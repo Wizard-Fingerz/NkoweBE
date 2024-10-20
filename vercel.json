@@ -14,5 +14,7 @@
             "src": "/(.*)",
             "dest": "nkowebe/wsgi.py"
         }
-    ]
+    ],
+
+  "buildCommand": "python manage.py collectstatic --noinput"
 }
