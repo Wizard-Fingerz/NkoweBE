@@ -8,6 +8,10 @@
         {
             "src": "/(.*)",
             "dest": "nkowebe/wsgi.py"
-        }
+        },
+        {
+            "src": "/static/(.*)",
+            "dest": "/static/$1"
+          }
     ]
 }
