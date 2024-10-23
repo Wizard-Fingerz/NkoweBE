@@ -51,10 +51,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.twitter',
     'corsheaders',
 
-
-
-
-    # apss
+    # apps
     'account',
     'classroom_app',
 ]
