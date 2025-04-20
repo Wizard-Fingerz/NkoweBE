@@ -36,7 +36,7 @@ class InstitutionTypeAdmin(ImportExportModelAdmin):
 
 @admin.register(Classroom)
 class ClassroomAdmin(ImportExportModelAdmin, SendMassEmailMixin):
-    list_display = ('name', 'institution', 'subject',
+    list_display = ('name', 'institution', 
                     'capacity', 'description')
     list_filter = ('institution', 'subject')
     search_fields = ('name', 'institution__name', 'subject__name')

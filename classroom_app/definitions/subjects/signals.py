@@ -10,7 +10,6 @@ def create_subjects_from_file(sender, **kwargs):
        
 
         file_path = os.path.join(os.path.dirname(__file__), 'subjects.txt')
-        print(file_path)
         if not os.path.exists(file_path):
             print(f"Subjects file not found: {file_path}")
             return
@@ -21,7 +20,6 @@ def create_subjects_from_file(sender, **kwargs):
                 if not line.strip():
                     continue
                 
-                print(f"Processing line: {line.strip()}")
                 # Parse the line (name, description, level, category)
                 try:
                     name, description, level, category = line.strip().split(',')
@@ -33,6 +31,5 @@ def create_subjects_from_file(sender, **kwargs):
                             'category': category.strip(),
                         }
                     )
-                    print(f"Created or updated subject: {name.strip()}")
                 except ValueError:
                     print(f"Invalid line format: {line.strip()}")

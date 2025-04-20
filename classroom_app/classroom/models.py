@@ -10,7 +10,7 @@ from classroom_app.definitions.examination_types.models import ExaminationType
 class Classroom(models.Model):
     name = models.CharField(max_length=255)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name="classroom_institution")
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    subject = models.ManyToManyField(Subject)
     capacity = models.IntegerField()
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
