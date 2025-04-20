@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from account.definitions.models import Title
-from classroom_app.models import Subject
+from classroom_app.definitions.subjects.models import Subject
 # from classroom_app.institution.models import Institution
 
 

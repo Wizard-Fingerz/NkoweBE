@@ -3,8 +3,8 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from account.models import CustomUser, Student, Tutor
-from classroom_app.models import Subject
 from classroom_app.institution.models import Institution
+from classroom_app.definitions.subjects.models import Subject
 
 class Classroom(models.Model):
     name = models.CharField(max_length=255)

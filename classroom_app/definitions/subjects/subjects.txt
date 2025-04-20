@@ -1,0 +1,20 @@
+Mathematics,Study of numbers and equations,Advanced,STEM
+History,Study of past events,Intermediate,Humanities
+English,Study of language and literature,Beginner,Languages
+Philosophy,Study of fundamental questions about existence and ethics,Advanced,Humanities
+Literature,Study of written and oral texts,Intermediate,Humanities
+Linguistics,Study of language structure and use,Advanced,Humanities
+Religious Studies,Study of religious beliefs and institutions,Intermediate,Humanities
+Biology,Study of living organisms and life processes,Intermediate,Natural Science
+Chemistry,Study of substances and chemical reactions,Advanced,Natural Science
+Physics,Study of matter and energy and their interactions,Advanced,Natural Science
+Environmental Science,Study of the environment and sustainability,Intermediate,Natural Science
+Statistics,Study of data analysis and interpretation,Intermediate,Formal Science
+Computer Science,Study of computation and algorithms,Advanced,Formal Science
+Psychology,Study of the human mind and behavior,Intermediate,Social Science
+Sociology,Study of society and social behavior,Intermediate,Social Science
+Political Science,Study of politics and government systems,Intermediate,Social Science
+Economics,Study of production and consumption of goods,Advanced,Social Science
+Geography,Study of Earth's physical features and human interaction,Intermediate,Social Science
+Art,Study of visual creative expression,Beginner,Arts
+Music,Study of sound and musical composition,Beginner,Arts
