@@ -64,9 +64,9 @@ class ClassroomStudentViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class ExaminationTypeViewSet(viewsets.ModelViewSet):
-    queryset = ExaminationType.objects.all()
-    serializer_class = ExaminationTypeSerializer
+# class ExaminationTypeViewSet(viewsets.ModelViewSet):
+#     queryset = ExaminationType.objects.all()
+#     serializer_class = ExaminationTypeSerializer
 
 
 class ClassroomExaminationViewSet(viewsets.ModelViewSet):
