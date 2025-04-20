@@ -1,6 +1,5 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from classroom_app.models import InstitutionType
 
 # Register your models here.
 
@@ -13,6 +12,8 @@ from import_export.admin import ImportExportModelAdmin
 from django.contrib.admin.actions import delete_selected
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.core.mail import send_mass_mail
+
+from classroom_app.institution.models import Institution, InstitutionType
 
 from .classroom.models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, ClassroomStudent, ExaminationType, ClassroomExamination, ClassroomAttachment, Tag, ClassroomTag, Comment
 
@@ -124,3 +125,13 @@ class ClassroomTermsAndConditionsAdmin(ImportExportModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+    
+
+
+@admin.register(Institution)
+class InstitutionAdmin(ImportExportModelAdmin, SendMassEmailMixin):
+    list_display = ('name', 'institution_type', 'address', 'phone', 'email')
+    list_filter = ('institution_type',)
+    search_fields = ('name', 'address', 'phone', 'email')
+    actions = ['delete_selected', 'send_mass_email']
+

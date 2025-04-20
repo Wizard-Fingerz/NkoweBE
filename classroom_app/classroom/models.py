@@ -3,11 +3,12 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from account.models import CustomUser, Student, Tutor
-from classroom_app.models import Institution, Subject
+from classroom_app.models import Subject
+from classroom_app.institution.models import Institution
 
 class Classroom(models.Model):
     name = models.CharField(max_length=255)
-    institution = models.ForeignKey(Institution, on_delete=models.CASCADE)
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name="classroom_institution")
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     capacity = models.IntegerField()
     description = models.TextField(blank=True)

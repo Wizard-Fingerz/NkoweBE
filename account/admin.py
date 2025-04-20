@@ -10,8 +10,8 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.core.mail import send_mass_mail
 
 from account.mails.models import MailTemplate
-from classroom_app.models import InstitutionType
-from .models import Administrator, Alumni, Counselor, CustomUser , Admin, GovernmentAgency, GuestLecturer, ITStaff, Librarian, Mentor, ResearchPartner, Student, Parent, InstitutionalOwner, Teacher, Tutor, Moderator, Institution
+# from classroom_app.models import InstitutionType
+from .models import Administrator, Alumni, Counselor, CustomUser , Admin, GovernmentAgency, GuestLecturer, ITStaff, Librarian, Mentor, ResearchPartner, Student, Parent, InstitutionalOwner, Teacher, Tutor, Moderator
 
 class SendMassEmailMixin:
     def send_mass_email(self, request, queryset):
@@ -60,14 +60,6 @@ class ParentAdmin(ImportExportModelAdmin, SendMassEmailMixin):
     list_filter = ('relationship',)
     search_fields = ('user__username', 'user__email', 'name', 'email', 'phone', 'address')
     actions = ['delete_selected', 'send_mass_email']
-
-@admin.register(Institution)
-class InstitutionAdmin(ImportExportModelAdmin, SendMassEmailMixin):
-    list_display = ('name', 'institution_type', 'address', 'phone', 'email')
-    list_filter = ('institution_type',)
-    search_fields = ('name', 'address', 'phone', 'email')
-    actions = ['delete_selected', 'send_mass_email']
-
 
 @admin.register(Tutor)
 class TutorAdmin(ImportExportModelAdmin, SendMassEmailMixin):

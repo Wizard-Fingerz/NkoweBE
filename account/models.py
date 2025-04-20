@@ -3,7 +3,8 @@ from django.db import models
 from django.utils.translation import gettext as _
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from account.definitions.models import Title
-from classroom_app.models import Institution, Subject
+from classroom_app.models import Subject
+# from classroom_app.institution.models import Institution
 
 
 class UserType(models.TextChoices):
@@ -65,7 +66,7 @@ class Student(models.Model):
         ('High School', 'High School'),
         ('College', 'College'),
     ])
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
     subjects_of_interest = models.ManyToManyField(Subject, blank=True)
 
     # def __str__(self):
@@ -89,7 +90,7 @@ class Parent(models.Model):
 
 class InstitutionalOwner(models.Model):
     user = models.OneToOneField(CustomUser , on_delete=models.CASCADE, primary_key=True)
-    institution = models.ForeignKey(Institution, on_delete=models.CASCADE)
+    institution = models.ForeignKey('classroom_app.Institution', on_delete=models.CASCADE, related_name="insitution_in_institution_owner")
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     phone = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
@@ -100,7 +101,7 @@ class InstitutionalOwner(models.Model):
 class Tutor(models.Model):
     user = models.OneToOneField(CustomUser , on_delete=models.CASCADE, primary_key=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True, related_name="insitution_in_tutor")
     state = models.CharField(max_length=255)
     country = models.CharField(max_length=255)
     address = models.TextField()
@@ -125,7 +126,7 @@ class Teacher(models.Model):
     subject_specialization = models.CharField(max_length=255)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -135,7 +136,7 @@ class Counselor(models.Model):
     specialization = models.CharField(max_length=255)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -145,7 +146,7 @@ class Administrator(models.Model):
     role = models.CharField(max_length=255)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -154,7 +155,7 @@ class Librarian(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -164,7 +165,7 @@ class ITStaff(models.Model):
     role = models.CharField(max_length=255)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -173,7 +174,7 @@ class Alumni(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     graduation_year = models.DateField()
     degree = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -183,7 +184,7 @@ class GuestLecturer(models.Model):
     subject_specialization = models.CharField(max_length=255)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -192,7 +193,7 @@ class Mentor(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -201,7 +202,7 @@ class ResearchPartner(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     organization = models.CharField(max_length=255)
     research_interests = models.TextField()
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -210,7 +211,7 @@ class GovernmentAgency(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
     agency_name = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
 
     def __str__(self):
         return self.user.username
