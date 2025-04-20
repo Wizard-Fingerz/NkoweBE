@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from account.models import Student, Tutor
+from account.models import CustomUser, Student, Tutor
 from classroom_app.models import Institution, Subject
 
 class Classroom(models.Model):
@@ -13,6 +13,21 @@ class Classroom(models.Model):
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.SET_NULL, 
+        related_name="classroom_creator", 
+        null=True, 
+        blank=True
+    )
+    modified_by = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.SET_NULL, 
+        related_name="classroom_modifier", 
+        null=True, 
+        blank=True
+    )
+    is_deleted = models.BooleanField(default=False)  # Flag to mark the classroom as deleted
 
     def __str__(self):
         return self.name
