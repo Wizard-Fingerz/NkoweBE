@@ -1,15 +1,10 @@
 from django.db import models
 
 from account.models import InstitutionalOwner
+from classroom_app.definitions.insitution_types.models import InstitutionType
 
 # Create your models here.
 
-class InstitutionType(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
 
 class Institution(models.Model):
     name = models.CharField(max_length=255)

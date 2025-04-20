@@ -1,5 +1,4 @@
 from django.contrib import admin
-from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 
@@ -36,7 +35,7 @@ class InstitutionTypeAdmin(ImportExportModelAdmin):
 
 @admin.register(Classroom)
 class ClassroomAdmin(ImportExportModelAdmin, SendMassEmailMixin):
-    list_display = ('name', 'institution', 
+    list_display = ('name', 'institution',
                     'capacity', 'description')
     list_filter = ('institution', 'subject')
     search_fields = ('name', 'institution__name', 'subject__name')
@@ -99,7 +98,8 @@ class CommentAdmin(ImportExportModelAdmin, SendMassEmailMixin):
 
 @admin.register(ClassroomTermsAndConditions)
 class ClassroomTermsAndConditionsAdmin(ImportExportModelAdmin):
-    list_display = ('classroom', 'created_at', 'updated_at', 'view_terms_and_conditions')
+    list_display = ('classroom', 'created_at', 'updated_at',
+                    'view_terms_and_conditions')
     list_filter = ('classroom',)
     search_fields = ('classroom__name', 'terms_and_conditions')
     actions = ['delete_selected']
@@ -118,7 +118,6 @@ class ClassroomTermsAndConditionsAdmin(ImportExportModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
-    
 
 
 @admin.register(Institution)
@@ -127,6 +126,7 @@ class InstitutionAdmin(ImportExportModelAdmin, SendMassEmailMixin):
     list_filter = ('institution_type',)
     search_fields = ('name', 'address', 'phone', 'email')
     actions = ['delete_selected', 'send_mass_email']
+
 
 @admin.register(Subject)
 class SubjectAdmin(ImportExportModelAdmin):
