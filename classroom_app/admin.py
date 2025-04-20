@@ -16,7 +16,7 @@ from django.core.mail import send_mass_mail
 from classroom_app.institution.models import Institution, InstitutionType
 from classroom_app.definitions.subjects.models import Subject
 
-from .classroom.models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, ClassroomStudent, ExaminationType, ClassroomExamination, ClassroomAttachment, Tag, ClassroomTag, Comment
+from .classroom.models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, ClassroomStudent, ExaminationType, ClassroomExamination, ClassroomAttachment, Tag, Comment
 
 
 class SendMassEmailMixin:
@@ -86,14 +86,6 @@ class ClassroomAttachmentAdmin(ImportExportModelAdmin, SendMassEmailMixin):
 class TagAdmin(ImportExportModelAdmin, SendMassEmailMixin):
     list_display = ('name',)
     search_fields = ('name',)
-    actions = ['delete_selected', 'send_mass_email']
-
-
-@admin.register(ClassroomTag)
-class ClassroomTagAdmin(ImportExportModelAdmin, SendMassEmailMixin):
-    list_display = ('classroom', 'tag')
-    list_filter = ('classroom', 'tag')
-    search_fields = ('classroom__name', 'tag__name')
     actions = ['delete_selected', 'send_mass_email']
 
 

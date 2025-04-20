@@ -12,7 +12,8 @@ class DetailedClassroomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Classroom
-        fields = ['id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at', 'updated_at', 'participantCount', 'tags', 'avatars', 'attachments', 'comments', 'classDetails']
+        fields = ['id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at',
+                  'updated_at', 'participantCount', 'tags', 'avatars', 'attachments', 'comments', 'classDetails']
 
     def get_participantCount(self, obj):
         return obj.classroomstudent_set.count()
@@ -39,38 +40,46 @@ class DetailedClassroomSerializer(serializers.ModelSerializer):
             'terms': 'By joining this class, you agree to follow the course guidelines and participate in discussions.',
         }
 
+
 class ClassroomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom
-        fields = ['id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'institution', 'tag', 'subject',
+                  'capacity', 'description', 'created_at', 'updated_at']
+
 
 class ClassroomTutorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassroomTutor
         fields = ['id', 'classroom', 'tutor', 'role']
 
+
 class ClassroomStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassroomStudent
         fields = ['id', 'classroom', 'student']
+
 
 class ExaminationTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExaminationType
         fields = ['id', 'name']
 
+
 class ClassroomExaminationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassroomExamination
         fields = ['id', 'classroom', 'examination_type', 'description']
 
+
 class ClassroomAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassroomAttachment
         fields = ['id', 'classroom', 'file', 'description', 'uploaded_at']
-        
+
 
 class ClassroomTermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassroomTermsAndConditions
-        fields = ['id', 'classroom', 'terms_and_conditions', 'created_at', 'updated_at']
+        fields = ['id', 'classroom', 'terms_and_conditions',
+                  'created_at', 'updated_at']

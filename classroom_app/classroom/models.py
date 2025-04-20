@@ -7,9 +7,19 @@ from classroom_app.institution.models import Institution
 from classroom_app.definitions.subjects.models import Subject
 from classroom_app.definitions.examination_types.models import ExaminationType
 
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+    
+
 class Classroom(models.Model):
     name = models.CharField(max_length=255)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name="classroom_institution")
+    tag = models.ManyToManyField(Tag)
     subject = models.ManyToManyField(Subject)
     capacity = models.IntegerField()
     description = models.TextField(blank=True)
@@ -77,18 +87,6 @@ class ClassroomAttachment(models.Model):
         return f"{self.file.name} - {self.classroom.name}"
 
 
-class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
-
-class ClassroomTag(models.Model):
-    classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.classroom.name} - {self.tag.name}"
     
 class Comment(models.Model):
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
