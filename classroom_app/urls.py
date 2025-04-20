@@ -16,6 +16,9 @@ router.register(r'examination_types', ExaminationTypeViewSet, basename='examinat
 router.register(r'classroom_examinations', ClassroomExaminationViewSet, basename='classroom_examinations')
 router.register(r'classroom_attachments', ClassroomAttachmentViewSet, basename='classroom_attachments')
 router.register(r'terms-and-conditions', ClassroomTermsAndConditionsViewSet, basename='classroom_terms_and_condition')
+router.register(r'examination-types', ExaminationTypeViewSet, basename='examination-type')
+
+
 
 urlpatterns = [
     path('', include(router.urls)),

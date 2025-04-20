@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from account.models import CustomUser, Student, Tutor
 from classroom_app.institution.models import Institution
 from classroom_app.definitions.subjects.models import Subject
+from classroom_app.definitions.examination_types.models import ExaminationType
 
 class Classroom(models.Model):
     name = models.CharField(max_length=255)
@@ -57,11 +58,6 @@ class ClassroomStudent(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.classroom.name}"
 
-class ExaminationType(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
 
 class ClassroomExamination(models.Model):
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
