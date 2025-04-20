@@ -10,7 +10,7 @@ from .views import ClassroomViewSet, ClassroomTutorViewSet, ClassroomStudentView
 router = routers.DefaultRouter()
 router.register(r'classrooms', ClassroomViewSet, basename='classrooms')
 router.register(r'institution', InstitutionViewSet, basename='institution')
-router.register(r'institution-type', InstitutionTypeViewSet, basename='institution_type')
+router.register(r'institution-types', InstitutionTypeViewSet, basename='institution_type')
 router.register(r'subjects', SubjectViewSet, basename='subjects')
 router.register(r'classroom_tutors', ClassroomTutorViewSet, basename='classroom_tutors')
 router.register(r'classroom_students', ClassroomStudentViewSet, basename='classroom_students')
