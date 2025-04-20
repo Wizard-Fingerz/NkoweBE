@@ -7,3 +7,5 @@ class ClassroomAppConfig(AppConfig):
 
     def ready(self):
         import classroom_app.definitions.subjects.signals  # Import the signals
+        import classroom_app.definitions.examination_types.signals  # Import the signals
+        import classroom_app.definitions.insitution_types.signals

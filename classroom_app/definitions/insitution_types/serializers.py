@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import ExaminationType
+from .models import InstitutionType
 
-class ExaminationTypeSerializer(serializers.ModelSerializer):
+class InstitutionTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ExaminationType
+        model = InstitutionType
         fields = ['id', 'name', 'is_active', 'is_deleted', 'created_at']

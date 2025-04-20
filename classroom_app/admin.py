@@ -26,13 +26,6 @@ class SendMassEmailMixin:
     send_mass_email.short_description = 'Send mass email'
 
 
-@admin.register(InstitutionType)
-class InstitutionTypeAdmin(ImportExportModelAdmin):
-    list_display = ('name', )
-    search_fields = ('name', )
-    actions = ['delete_selected']
-
-
 @admin.register(Classroom)
 class ClassroomAdmin(ImportExportModelAdmin, SendMassEmailMixin):
     list_display = ('name', 'institution',
@@ -60,7 +53,7 @@ class ClassroomStudentAdmin(ImportExportModelAdmin, SendMassEmailMixin):
 
 @admin.register(ExaminationType)
 class ExaminationTypeAdmin(ImportExportModelAdmin, SendMassEmailMixin):
-    list_display = ('name',)
+    list_display = ('name', 'description', 'region', 'level')
     search_fields = ('name',)
     actions = ['delete_selected', 'send_mass_email']
 
@@ -139,3 +132,9 @@ class SubjectAdmin(ImportExportModelAdmin):
         for obj in queryset:
             obj.delete()
         self.message_user(request, "Selected subjects have been deleted.")
+
+@admin.register(InstitutionType)
+class InstitutionType(ImportExportModelAdmin):
+    list_display = ('name', 'is_active', 'is_deleted', 'created_at', )
+    search_fields = ('name', )
+    list_filter = ('is_active', 'is_deleted', 'created_at', )

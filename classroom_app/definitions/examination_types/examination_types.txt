@@ -1,0 +1,30 @@
+
+WASSCE,West African Senior School Certificate Examination,Secondary,West Africa
+NECO,National Examinations Council,Secondary,Nigeria
+NABTEB,National Business and Technical Examinations Board,Vocational,Nigeria
+GCE,General Certificate of Education,Secondary,UK and former colonies
+A-Levels,Advanced Level qualification for university entrance,Secondary,UK
+IB,International Baccalaureate,Secondary,Global
+French Baccalauréat,National exam for university admission,Secondary,France
+Abitur,German university entrance qualification,Secondary,Germany
+Gaokao,National college entrance exam,Secondary,China
+Suneung,College Scholastic Ability Test,Secondary,South Korea
+Unified State Exam,Russian standardized test for university,Secondary,Russia
+SAT,Scholastic Assessment Test,University Entrance,USA
+ACT,American College Testing,University Entrance,USA
+GRE,Graduate Record Examination,Graduate Entrance,Global
+GMAT,Graduate Management Admission Test,Business School Entrance,Global
+MCAT,Medical College Admission Test,Medical School Entrance,USA & Canada
+LSAT,Law School Admission Test,Law School Entrance,USA & Canada
+IELTS,International English Language Testing System,English Proficiency,Global
+TOEFL,Test of English as a Foreign Language,English Proficiency,Global
+PTE,Pearson Test of English,English Proficiency,Global
+Duolingo English Test,Online English Proficiency Test,English Proficiency,Global
+BTEC,Business and Technology Education Council,Vocational,UK
+City & Guilds,Technical and vocational certifications,Vocational,UK
+National Certificate,Vocational qualification in fields like engineering,Vocational,Various Countries
+USMLE,United States Medical Licensing Examination,Medical Licensing,USA
+NCLEX,Nursing licensure examination,Nursing Licensing,USA & Canada
+Bar Examination,Licensing exam to practice law,Law Licensing,Various Countries
+CPA,Certified Public Accountant,Accounting Certification,USA
+CFA,Chartered Financial Analyst,Finance Certification,Global

@@ -4,11 +4,13 @@ from rest_framework import routers
 from classroom_app.classroom.views import ClassroomTermsAndConditionsViewSet
 from classroom_app.institution.views import InstitutionViewSet
 from classroom_app.definitions.subjects.views import SubjectViewSet
+from classroom_app.definitions.insitution_types.views import InstitutionTypeViewSet
 from .views import ClassroomViewSet, ClassroomTutorViewSet, ClassroomStudentViewSet, ExaminationTypeViewSet, ClassroomExaminationViewSet, ClassroomAttachmentViewSet
 
 router = routers.DefaultRouter()
 router.register(r'classrooms', ClassroomViewSet, basename='classrooms')
 router.register(r'institution', InstitutionViewSet, basename='institution')
+router.register(r'institution-type', InstitutionTypeViewSet, basename='institution_type')
 router.register(r'subjects', SubjectViewSet, basename='subjects')
 router.register(r'classroom_tutors', ClassroomTutorViewSet, basename='classroom_tutors')
 router.register(r'classroom_students', ClassroomStudentViewSet, basename='classroom_students')

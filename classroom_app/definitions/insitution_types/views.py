@@ -1,11 +1,11 @@
 from rest_framework import viewsets
-from .models import ExaminationType
-from .serializers import ExaminationTypeSerializer
+from .models import InstitutionType
+from .serializers import InstitutionTypeSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-class ExaminationTypeViewSet(viewsets.ModelViewSet):
-    queryset = ExaminationType.objects.filter(is_deleted=False)  # Exclude deleted items
-    serializer_class = ExaminationTypeSerializer
+class InstitutionTypeViewSet(viewsets.ModelViewSet):
+    queryset = InstitutionType.objects.filter(is_deleted=False)  # Exclude deleted items
+    serializer_class = InstitutionTypeSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_destroy(self, instance):
