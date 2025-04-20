@@ -4,6 +4,27 @@ from rest_framework import status
 from .models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, ClassroomStudent, ExaminationType, ClassroomExamination, ClassroomAttachment
 from .serializers import ClassroomSerializer, ClassroomTermsAndConditionsSerializer, ClassroomTutorSerializer, ClassroomStudentSerializer, ExaminationTypeSerializer, ClassroomExaminationSerializer, ClassroomAttachmentSerializer
 
+
+from rest_framework import viewsets, pagination
+
+
+class CustomPagination(pagination.PageNumberPagination):
+    page_size = 15
+    page_size_query_param = 'page_size'
+    max_page_size = 15
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'num_pages': self.page.paginator.num_pages,
+            'page_size': self.page_size,
+            'current_page': self.page.number,
+            'results': data
+        })
+
+
 class ClassroomViewSet(viewsets.ModelViewSet):
     queryset = Classroom.objects.all()
     serializer_class = ClassroomSerializer
@@ -18,6 +39,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(subject_id=subject_id)
         return queryset
 
+
 class ClassroomTutorViewSet(viewsets.ModelViewSet):
     queryset = ClassroomTutor.objects.all()
     serializer_class = ClassroomTutorSerializer
@@ -28,6 +50,7 @@ class ClassroomTutorViewSet(viewsets.ModelViewSet):
         if classroom_id is not None:
             queryset = queryset.filter(classroom_id=classroom_id)
         return queryset
+
 
 class ClassroomStudentViewSet(viewsets.ModelViewSet):
     queryset = ClassroomStudent.objects.all()
@@ -40,9 +63,11 @@ class ClassroomStudentViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(classroom_id=classroom_id)
         return queryset
 
+
 class ExaminationTypeViewSet(viewsets.ModelViewSet):
     queryset = ExaminationType.objects.all()
     serializer_class = ExaminationTypeSerializer
+
 
 class ClassroomExaminationViewSet(viewsets.ModelViewSet):
     queryset = ClassroomExamination.objects.all()
@@ -54,6 +79,7 @@ class ClassroomExaminationViewSet(viewsets.ModelViewSet):
         if classroom_id is not None:
             queryset = queryset.filter(classroom_id=classroom_id)
         return queryset
+
 
 class ClassroomAttachmentViewSet(viewsets.ModelViewSet):
     queryset = ClassroomAttachment.objects.all()

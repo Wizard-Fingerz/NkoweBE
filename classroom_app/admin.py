@@ -14,6 +14,7 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.core.mail import send_mass_mail
 
 from classroom_app.institution.models import Institution, InstitutionType
+from classroom_app.definitions.subjects.models import Subject
 
 from .classroom.models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, ClassroomStudent, ExaminationType, ClassroomExamination, ClassroomAttachment, Tag, ClassroomTag, Comment
 
@@ -135,3 +136,14 @@ class InstitutionAdmin(ImportExportModelAdmin, SendMassEmailMixin):
     search_fields = ('name', 'address', 'phone', 'email')
     actions = ['delete_selected', 'send_mass_email']
 
+@admin.register(Subject)
+class SubjectAdmin(ImportExportModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name', 'description')
+    actions = ['delete_selected']
+
+    def delete_selected(self, request, queryset):
+        # Custom delete action logic
+        for obj in queryset:
+            obj.delete()
+        self.message_user(request, "Selected subjects have been deleted.")
