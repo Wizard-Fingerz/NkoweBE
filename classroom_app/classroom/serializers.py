@@ -9,35 +9,55 @@ class DetailedClassroomSerializer(serializers.ModelSerializer):
     attachments = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
     classDetails = serializers.SerializerMethodField()
+    examinations = serializers.SerializerMethodField()
 
     class Meta:
         model = Classroom
-        fields = ['id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at',
-                  'updated_at', 'participantCount', 'tags', 'avatars', 'attachments', 'comments', 'classDetails']
+        fields = [
+            'id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at',
+            'updated_at', 'participantCount', 'tags', 'avatars', 'attachments',
+            'comments', 'examinations', 'classDetails'
+        ]
 
     def get_participantCount(self, obj):
         return obj.classroomstudent_set.count()
 
     def get_tags(self, obj):
-        # Assuming you have a many-to-many field for tags in your Classroom model
-        return [tag.name for tag in obj.tags.all()]
+        return [tag.name for tag in obj.tag.all()]
 
     def get_avatars(self, obj):
-        # Assuming you have a many-to-many field for students in your Classroom model
-        return [student.avatar for student in obj.classroomstudent_set.all()[:10]]
+        # Return URLs or paths of student avatars
+        students = obj.classroomstudent_set.select_related('student__user').all()[:10]
+        return [student.student.profile_picture.url if student.student.profile_picture else None for student in students]
 
     def get_attachments(self, obj):
         return obj.classroomattachment_set.count()
 
     def get_comments(self, obj):
-        # Assuming you have a many-to-many field for comments in your Classroom model
-        return obj.classroomcomment_set.count()
+        return obj.comment_set.count()
+
+    def get_examinations(self, obj):
+        return [
+            {
+                "id": exam.id,
+                "type": exam.examination_type.name,  # Exam Type name
+                "description": exam.description,
+            }
+            for exam in obj.classroomexamination_set.select_related('examination_type').all()
+        ]
 
     def get_classDetails(self, obj):
+        terms = ""
+        try:
+            terms_obj = obj.classroomtermsandconditions
+            terms = terms_obj.terms_and_conditions
+        except ClassroomTermsAndConditions.DoesNotExist:
+            terms = "By joining this class, you agree to follow the course guidelines and participate in discussions."
+        
         return {
-            'title': obj.name,
-            'description': obj.description,
-            'terms': 'By joining this class, you agree to follow the course guidelines and participate in discussions.',
+            "title": obj.name,
+            "description": obj.description,
+            "terms": terms,
         }
 
 
