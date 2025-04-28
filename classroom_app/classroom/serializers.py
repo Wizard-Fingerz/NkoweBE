@@ -14,7 +14,7 @@ class DetailedClassroomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Classroom
         fields = [
-            'id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at',
+            'id', 'custom_id', 'name', 'institution', 'subject', 'capacity', 'description', 'created_at',
             'updated_at', 'participantCount', 'tags', 'avatars', 'attachments',
             'comments', 'examinations', 'classDetails'
         ]

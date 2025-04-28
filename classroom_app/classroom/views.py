@@ -30,6 +30,8 @@ class CustomPagination(pagination.PageNumberPagination):
 class ClassroomViewSet(viewsets.ModelViewSet):
     queryset = Classroom.objects.all()
     serializer_class = ClassroomSerializer
+    lookup_field = 'custom_id'
+
 
     def get_queryset(self):
         queryset = Classroom.objects.all()
