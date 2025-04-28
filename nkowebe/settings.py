@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
     'corsheaders',
+     "channels", 
 
     # apps
     'account',
@@ -87,6 +88,22 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nkowebe.wsgi.application'
+
+# Set ASGI application
+ASGI_APPLICATION = "nkowebe.asgi.application"
+
+
+
+# Channel layers (for Redis backend)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  # Redis running locally
+        },
+    },
+}
+
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
