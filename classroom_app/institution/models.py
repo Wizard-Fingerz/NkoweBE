@@ -8,7 +8,7 @@ import uuid
 
 
 class Institution(models.Model):
-    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    custom_id = models.UUIDField(default=uuid.uuid4, unique = True, editable=False)
     name = models.CharField(max_length=255)
     address = models.TextField()
     phone = models.CharField(max_length=20)

@@ -29,7 +29,7 @@ class UserType(models.TextChoices):
 
 
 class CustomUser(AbstractUser):
-    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    custom_id = models.UUIDField(default=uuid.uuid4, unique = True, editable=False)
     user_type = models.CharField(max_length=20, choices=[(choice.value, choice.name) for choice in UserType], default=UserType.OTHER.value)
     email = models.EmailField(unique=True)
     

@@ -6,7 +6,7 @@ import uuid
 
 
 class Subject(models.Model):
-    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    custom_id = models.UUIDField(default=uuid.uuid4, unique = True, editable=False)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     level = models.CharField(max_length=20, choices=[
