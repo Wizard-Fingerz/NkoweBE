@@ -1,9 +1,11 @@
 
 from django.db import models
 
+import uuid
 
 
 class ExaminationType(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
     level = models.CharField(max_length=100)  # e.g., Secondary, Vocational

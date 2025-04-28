@@ -5,6 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from account.definitions.models import Title
 from classroom_app.definitions.subjects.models import Subject
 # from classroom_app.institution.models import Institution
+import uuid
 
 
 class UserType(models.TextChoices):
@@ -28,6 +29,7 @@ class UserType(models.TextChoices):
 
 
 class CustomUser(AbstractUser):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     user_type = models.CharField(max_length=20, choices=[(choice.value, choice.name) for choice in UserType], default=UserType.OTHER.value)
     email = models.EmailField(unique=True)
     

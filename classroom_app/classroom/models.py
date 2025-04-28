@@ -6,10 +6,12 @@ from account.models import CustomUser, Student, Tutor
 from classroom_app.institution.models import Institution
 from classroom_app.definitions.subjects.models import Subject
 from classroom_app.definitions.examination_types.models import ExaminationType
-
+import uuid
 
 
 class Tag(models.Model):
+    
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
@@ -17,6 +19,7 @@ class Tag(models.Model):
     
 
 class Classroom(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name="classroom_institution")
     tag = models.ManyToManyField(Tag)
@@ -49,6 +52,7 @@ class Classroom(models.Model):
         return self.classroomstudent_set.count()
 
 class ClassroomTutor(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='tutors')
     comments = GenericRelation('Comment', related_query_name='tutor_comments')
@@ -61,6 +65,7 @@ class ClassroomTutor(models.Model):
         return f"{self.tutor.username} - {self.classroom.name}"
 
 class ClassroomStudent(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='students')
     comments = GenericRelation('Comment', related_query_name='student_comments')
@@ -70,6 +75,7 @@ class ClassroomStudent(models.Model):
 
 
 class ClassroomExamination(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     examination_type = models.ForeignKey(ExaminationType, on_delete=models.CASCADE)
     description = models.TextField(blank=True)
@@ -78,6 +84,7 @@ class ClassroomExamination(models.Model):
         return f"{self.examination_type.name} - {self.classroom.name}"
 
 class ClassroomAttachment(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     file = models.FileField(upload_to='classroom_attachments/')
     description = models.TextField(blank=True)
@@ -89,6 +96,7 @@ class ClassroomAttachment(models.Model):
 
     
 class Comment(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -101,6 +109,7 @@ class Comment(models.Model):
     
 
 class ClassroomTermsAndConditions(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     classroom = models.OneToOneField(Classroom, on_delete=models.CASCADE)
     terms_and_conditions = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

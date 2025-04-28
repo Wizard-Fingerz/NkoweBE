@@ -1,7 +1,9 @@
 # models.py
+import uuid
 from django.db import models
 
 class MailTemplate(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     subject = models.CharField(max_length=255)
     body = models.TextField()

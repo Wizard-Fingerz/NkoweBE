@@ -2,11 +2,13 @@ from django.db import models
 
 from account.models import InstitutionalOwner
 from classroom_app.definitions.insitution_types.models import InstitutionType
+import uuid
 
 # Create your models here.
 
 
 class Institution(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     address = models.TextField()
     phone = models.CharField(max_length=20)
