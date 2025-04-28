@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.decorators import action
 from account.models import CustomUser, Tutor
 from .models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, ClassroomStudent, ExaminationType, ClassroomExamination, ClassroomAttachment, Tag
 from .serializers import ClassroomSerializer, ClassroomTermsAndConditionsSerializer, ClassroomTutorSerializer, ClassroomStudentSerializer, DetailedClassroomSerializer, ExaminationTypeSerializer, ClassroomExaminationSerializer, ClassroomAttachmentSerializer
@@ -72,6 +72,28 @@ class ClassroomViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+
+
+    @action(detail=True, methods=['get'])
+    def attachments(self, request, custom_id=None):
+        classroom = self.get_object()
+        attachments = classroom.classroomattachment_set.all()
+        data = ClassroomAttachmentSerializer(attachments, many=True).data
+        return Response(data)
+
+    @action(detail=True, methods=['get'])
+    def tutors(self, request, custom_id=None):
+        classroom = self.get_object()
+        classroom_tutors = classroom.classroomtutor_set.all()
+        data = ClassroomTutorSerializer(classroom_tutors, many=True).data
+        return Response(data)
+
+    @action(detail=True, methods=['get'])
+    def students(self, request, custom_id=None):
+        classroom = self.get_object()
+        classroom_students = classroom.classroomstudent_set.all()
+        data = ClassroomStudentSerializer(classroom_students, many=True).data
+        return Response(data)
 
 
 
