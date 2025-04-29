@@ -1,6 +1,6 @@
 from django.db import models
 from account.models import CustomUser
-from classroom_app.classrooms.models import Classroom
+from classroom_app.classroom.models import Classroom
 import uuid
 
 class ClassroomMessage(models.Model):
