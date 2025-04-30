@@ -90,7 +90,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'nkowebe.wsgi.application'
 
 # Set ASGI application
-ASGI_APPLICATION = "nkowebe.asgi.application"
+# ASGI_APPLICATION = "nkowebe.asgi.application"
 
 
 # Channel layers (for Redis backend)
