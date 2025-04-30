@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # installed libraries 
+    # installed libraries
     'drf_yasg',
     'import_export',
     'rest_framework',
@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
     'corsheaders',
-     "channels", 
+    "channels",
 
     # apps
     'account',
@@ -91,7 +91,6 @@ WSGI_APPLICATION = 'nkowebe.wsgi.application'
 
 # Set ASGI application
 ASGI_APPLICATION = "nkowebe.asgi.application"
-
 
 
 # Channel layers (for Redis backend)
