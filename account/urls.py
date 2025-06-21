@@ -21,6 +21,9 @@ from .views import (
     ResearchPartnerViewSet,
     GovernmentAgencyViewSet,
     TutorViewSet,
+    UserTypeViewSet,
+    ProfileView,
+    AnalyticsOverviewView,
 )
 
 router = DefaultRouter()
@@ -42,11 +45,12 @@ router.register(r'research_partners', ResearchPartnerViewSet)
 router.register(r'government_agencies', GovernmentAgencyViewSet)
 router.register(r'register', RegisterViewSet, basename='register')
 router.register(r'login', LoginViewSet, basename='login')
-
-
+router.register(r'users', CustomUserViewSet)
+router.register(r'user-types', UserTypeViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
     path('social-login/', SocialLoginView.as_view()),
-
+    path('profile/', ProfileView.as_view(), name='profile'),
+    path('analytics/overview/', AnalyticsOverviewView.as_view(), name='analytics-overview'),
 ]

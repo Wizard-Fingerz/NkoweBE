@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.template import RequestContext
+from django.contrib.auth.admin import UserAdmin
 
 # Register your models here.
 import import_export
@@ -11,7 +12,7 @@ from django.core.mail import send_mass_mail
 
 from account.mails.models import MailTemplate
 # from classroom_app.models import InstitutionType
-from .models import Administrator, Alumni, Counselor, CustomUser , Admin, GovernmentAgency, GuestLecturer, ITStaff, Librarian, Mentor, ResearchPartner, Student, Parent, InstitutionalOwner, Teacher, Tutor, Moderator
+from .models import Administrator, Alumni, Counselor, CustomUser , Admin, GovernmentAgency, GuestLecturer, ITStaff, Librarian, Mentor, ResearchPartner, Student, Parent, InstitutionalOwner, Teacher, Tutor, Moderator, UserType
 
 class SendMassEmailMixin:
     def send_mass_email(self, request, queryset):
@@ -142,4 +143,24 @@ class GovernmentAgencyAdmin(ImportExportModelAdmin, SendMassEmailMixin):
     list_filter = ('agency_name',)
     search_fields = ('user__username', 'agency_name', 'role')
     actions = ['delete_selected', 'send_mass_email']
+
+@admin.register(UserType)
+class UserTypeAdmin(ImportExportModelAdmin):
+    list_display = ('name', 'description', 'is_active', 'created_at')
+    list_filter = ('is_active', 'is_deleted')
+    search_fields = ('name', 'description')
+    ordering = ('name',)
+    readonly_fields = ('custom_id', 'created_at', 'updated_at')
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description')
+        }),
+        ('Status', {
+            'fields': ('is_active', 'is_deleted')
+        }),
+        ('System Information', {
+            'fields': ('custom_id', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 

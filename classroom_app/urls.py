@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers
 
+from classroom_app.classchat.views import ClassroomMessageViewSet
 from classroom_app.classroom.views import ClassroomTermsAndConditionsViewSet
 from classroom_app.institution.views import InstitutionViewSet
 from classroom_app.assignment.views import AssignmentViewSet
@@ -24,6 +25,7 @@ router.register(r'classroom-attachments', ClassroomAttachmentViewSet, basename='
 router.register(r'terms-and-conditions', ClassroomTermsAndConditionsViewSet, basename='classroom_terms_and_condition')
 router.register(r'examination-types', ExaminationTypeViewSet, basename='examination-type')
 router.register(r'assignments', AssignmentViewSet, basename = 'assignments')
+router.register(r'classroom-messages', ClassroomMessageViewSet, basename = 'classroom_message')
 
 
 

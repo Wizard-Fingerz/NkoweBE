@@ -27,6 +27,8 @@ from drf_yasg import openapi
 api_urlpatterns = [
     path('', include('account.urls')),
     path('', include('classroom_app.urls')),
+    path('', include('chat_app.urls')),
+
 ]
 
 schema_view = get_schema_view(
@@ -54,7 +56,6 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-  
 ]
 
 

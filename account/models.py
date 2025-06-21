@@ -8,29 +8,27 @@ from classroom_app.definitions.subjects.models import Subject
 import uuid
 
 
-class UserType(models.TextChoices):
-    ADMIN = 'admin', 'Admin'
-    STUDENT = 'student', 'Student'
-    INSTITUTION_OWNER = 'institution_owner', 'Institution Owner'
-    TUTOR = 'tutor', 'Tutor'
-    MODERATOR = 'moderator', 'Moderator'
-    TEACHER = 'teacher', 'Teacher'
-    COUNSELOR = 'counselor', 'Counselor'
-    ADMINISTRATOR = 'administrator', 'Administrator'
-    LIBRARIAN = 'librarian', 'Librarian'
-    IT_STAFF = 'it_staff', 'IT Staff'
-    ALUMNI = 'alumni', 'Alumni'
-    GUEST_LECTURER = 'guest_lecturer', 'Guest Lecturer'
-    MENTOR = 'mentor', 'Mentor'
-    RESEARCH_PARTNER = 'research_partner', 'Research Partner'
-    GOVERNMENT_AGENCY = 'government_agency', 'Government Agency'
-  
-    OTHER = 'other', 'Other'
+class UserType(models.Model):
+    custom_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'User Type'
+        verbose_name_plural = 'User Types'
+        ordering = ['name']
 
 
 class CustomUser(AbstractUser):
-    custom_id = models.UUIDField(default=uuid.uuid4, unique = True, editable=False)
-    user_type = models.CharField(max_length=20, choices=[(choice.value, choice.name) for choice in UserType], default=UserType.OTHER.value)
+    custom_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    user_type = models.ForeignKey(UserType, on_delete=models.SET_NULL, blank = True,null=True, related_name='users')
     email = models.EmailField(unique=True)
     
     groups = models.ManyToManyField(
@@ -93,7 +91,7 @@ class Parent(models.Model):
 class InstitutionalOwner(models.Model):
     user = models.OneToOneField(CustomUser , on_delete=models.CASCADE, primary_key=True)
     institution = models.ForeignKey('classroom_app.Institution', on_delete=models.CASCADE, related_name="insitution_in_institution_owner")
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE, null = True, blank = True)
     phone = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
 
@@ -129,6 +127,11 @@ class Teacher(models.Model):
     experience = models.TextField()
     qualifications = models.CharField(max_length=255)
     institutions = models.ManyToManyField('classroom_app.Institution', blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    state = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    address = models.TextField()
+    profile_picture = models.ImageField(upload_to='student_profiles')
 
     def __str__(self):
         return self.user.username

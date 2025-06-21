@@ -17,6 +17,6 @@ class Institution(models.Model):
     description = models.TextField(blank=True)
     logo = models.ImageField(upload_to='institution_logos', blank=True)
     institution_type = models.ForeignKey(InstitutionType, on_delete=models.CASCADE)
- 
+    
     def __str__(self):
         return self.name

@@ -1,6 +1,7 @@
 from django.db import transaction
 from .serializers import (
     DetailedStudentSerializer,
+    DetailedTeacherSerializer,
     LoginSerializer,
     RegisterSerializer,
     TeacherSerializer,
@@ -14,6 +15,7 @@ from .serializers import (
     ResearchPartnerSerializer,
     GovernmentAgencySerializer,
     CustomUserSerializer, AdminSerializer, StudentSerializer, InstitutionOwnerSerializer, TutorSerializer, ModeratorSerializer,
+    UserTypeSerializer,
 )
 from .models import (
     Teacher,
@@ -41,6 +43,8 @@ from allauth.socialaccount.providers.twitter.views import TwitterOAuthAdapter
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from django.db import IntegrityError
 from rest_framework.decorators import action
+from classroom_app.classroom.models import Classroom, ClassroomStudent
+from classroom_app.assignment.models import Assignment, StudentAssignment
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -70,7 +74,7 @@ class StudentViewSet(viewsets.ModelViewSet):
         user = request.user
         user.first_name = request.data.get('first_name')
         user.last_name = request.data.get('last_name')
-        user.user_type = UserType.STUDENT
+        user.user_type = UserType.objects.get(name = 'Student')
         user.save()
         return super().create(request, *args, **kwargs)
 
@@ -109,6 +113,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
         queryset = self.queryset
@@ -117,7 +122,36 @@ class TeacherViewSet(viewsets.ModelViewSet):
             if user.user_type == 'teacher':
                 queryset = queryset.filter(user=user)
         return queryset
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return DetailedTeacherSerializer
+        else:
+            return TeacherSerializer
+    
+    def create(self, request, *args, **kwargs):
+        request.data['user'] = request.user.id
+        user = request.user
+        user.first_name = request.data.get('first_name')
+        user.last_name = request.data.get('last_name')
+        user.user_type = UserType.objects.get(name = 'Teacher')
+        user.save()
+        return super().create(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        request.data['user'] = request.user.id
+        return super().update(request, *args, **kwargs)
+
+    @action(methods=['get'], detail=False, url_path='me', url_name='me')
+    def get_current_user(self, request):
+        try:
+            teacher = Teacher.objects.get(user=request.user)
+        except Teacher.DoesNotExist:
+            teacher = Teacher.objects.create(user=request.user)
+        
+        serializer = self.get_serializer(teacher)
+        return Response(serializer.data, status=status.HTTP_200_OK)  
+     
 
 class CounselorViewSet(viewsets.ModelViewSet):
     queryset = Counselor.objects.all()
@@ -276,7 +310,15 @@ class LoginViewSet(viewsets.ModelViewSet):
             user = authenticate(username=username, password=password)
             if user:
                 token, created = Token.objects.get_or_create(user=user)
-                return Response({'token': token.key}, status=200)
+                return Response({
+                    'token': token.key,
+                    'user': {
+                        'id': user.id,
+                        'email': user.email,
+                        'username': user.username,
+                        'user_type': user.user_type
+                    }
+                }, status=200)
             else:
                 return Response({'message': 'Invalid username or password'}, status=401)
         else:
@@ -307,3 +349,113 @@ class SocialLoginView(APIView):
             return Response({'token': user.auth_token.key}, status=200)
         else:
             return Response({'error': 'Invalid provider'}, status=400)
+
+
+class UserTypeViewSet(viewsets.ModelViewSet):
+    queryset = UserType.objects.filter(is_active=True)
+    serializer_class = UserTypeSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return UserType.objects.filter(is_active=True, is_deleted=False)
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        user_type = getattr(user, 'user_type', None)
+        profile = None
+        serializer = None
+
+        if user_type is None:
+            return Response({'detail': 'User type not set.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if str(user_type).lower() == 'student':
+            from .models import Student
+            from .serializers import DetailedStudentSerializer
+            try:
+                profile = Student.objects.get(user=user)
+                serializer = DetailedStudentSerializer(profile)
+            except Student.DoesNotExist:
+                return Response({'detail': 'Student profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        elif str(user_type).lower() == 'teacher':
+            from .models import Teacher
+            from .serializers import DetailedTeacherSerializer
+            try:
+                profile = Teacher.objects.get(user=user)
+                serializer = DetailedTeacherSerializer(profile)
+            except Teacher.DoesNotExist:
+                return Response({'detail': 'Teacher profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Add more user types as needed
+        # elif str(user_type).lower() == 'counselor':
+        #     ...
+
+        else:
+            return Response({'detail': f'Profile for user type {user_type} not implemented.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AnalyticsOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        user_type = getattr(user.user_type, 'name', '').lower() if user.user_type else ''
+        data = {}
+
+        if user_type == 'admin':
+            data = {
+                'totalUsers': CustomUser.objects.count(),
+                'totalTeachers': Teacher.objects.count(),
+                'totalStudents': Student.objects.count(),
+                'totalClassrooms': Classroom.objects.count(),
+                'totalAssignments': Assignment.objects.count(),
+                'assignmentsSubmitted': StudentAssignment.objects.filter(status='completed').count(),
+                # Add more as needed
+            }
+        elif user_type == 'teacher':
+            teacher = Teacher.objects.filter(user=user).first()
+            data = {
+                'totalClassesTaught': Classroom.objects.filter(classroomtutor__tutor__user=user).count(),
+                'totalStudents': Student.objects.count(),  # Optionally filter by teacher's classes
+                'assignmentsGiven': Assignment.objects.filter(created_by__tutor=teacher).count() if teacher else 0,
+                'examsCreated': 0,  # Placeholder, add logic if you have exams
+            }
+        elif user_type == 'student':
+            student = Student.objects.filter(user=user).first()
+            # Get the ClassroomStudent instance(s) for this student
+            classroom_students = ClassroomStudent.objects.filter(student=student) if student else []
+            total_courses_enrolled = classroom_students.count() if student else 0
+
+            # Get all StudentAssignment for this student
+            student_assignments = StudentAssignment.objects.filter(student__student=student) if student else []
+            # Calculate highest score (if scores are stored in StudentAssignment or related models)
+            # For now, let's assume Assignment has total_score, but StudentAssignment does not store obtained score
+            # If you store obtained score elsewhere, update this logic accordingly
+            highest_score = None
+            if student_assignments:
+                # If you have a field for obtained score, use it. Otherwise, this is a placeholder.
+                # Example: max(sa.obtained_score for sa in student_assignments if sa.obtained_score is not None)
+                pass
+
+            data = {
+                'totalClassrooms': Classroom.objects.filter(classroomstudent__student=student).count() if student else 0,
+                'totalAssignments': StudentAssignment.objects.filter(student__student=student).count() if student else 0,
+                'assignmentsCompleted': StudentAssignment.objects.filter(student__student=student, status='completed').count() if student else 0,
+                'totalCoursesEnrolled': total_courses_enrolled,
+                'highestScore': highest_score,
+                'totalNotes': 0,  # Not implemented
+                'totalNotebooks': 0,  # Not implemented
+                'totalHighlights': 0,  # Not implemented
+            }
+        else:
+            data = {'message': 'Analytics not available for this user type.'}
+
+        return Response(data)

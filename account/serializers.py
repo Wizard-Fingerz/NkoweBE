@@ -12,13 +12,39 @@ from .models import (
     GovernmentAgency,
     CustomUser, Admin, InstitutionalOwner, Student, Tutor, Moderator,
     UserType
- )
+)
+
+class UserTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserType
+        fields = ['custom_id', 'name', 'description', 'is_active']
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    user_type = UserTypeSerializer(read_only=True)
+    user_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=UserType.objects.filter(is_active=True),
+        source='user_type',
+        write_only=True,
+        required=False
+    )
+
     class Meta:
         model = CustomUser
-        fields = "__all__"
-        
+        fields = [
+            'id',
+            'custom_id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'user_type',
+            'user_type_id',
+            'is_active',
+            'date_joined'
+        ]
+        read_only_fields = ['id', 'custom_id', 'date_joined']
+
 
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,6 +58,12 @@ class DetailedStudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = "__all__"
 
+
+class DetailedTeacherSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True)
+    class Meta:
+        model = Teacher
+        fields = "__all__"
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
@@ -106,7 +138,7 @@ class GovernmentAgencySerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser 
-        fields = ('username', 'email', 'password', 'user_type')
+        fields = ('username', 'email', 'password')
         extra_kwargs = {
             'password': {'write_only': True},
         }

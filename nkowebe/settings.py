@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     # apps
     'account',
     'classroom_app',
+    'chat_app',
 ]
 
 MIDDLEWARE = [
@@ -96,11 +97,8 @@ WSGI_APPLICATION = 'nkowebe.wsgi.application'
 # Channel layers (for Redis backend)
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],  # Redis running locally
-        },
-    },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 
@@ -153,7 +151,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Your frontend origin
+    "http://127.0.0.1:5173",
+    # Add any other allowed origins
+]
 
 AUTH_USER_MODEL = 'account.CustomUser'
 

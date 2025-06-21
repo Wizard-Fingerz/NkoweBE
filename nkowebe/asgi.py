@@ -21,13 +21,21 @@
 
 import os
 import django
+from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nkowebe.settings')
 django.setup()
 
 from channels.routing import ProtocolTypeRouter, URLRouter
-from classroom_app.routings import websocket_urlpatterns
+from classroom_app.routings import websocket_urlpatterns as classroom_ws
+from chat_app.routing import websocket_urlpatterns as chat_ws
+from channels.auth import AuthMiddlewareStack
 
 application = ProtocolTypeRouter({
-    "websocket": URLRouter(websocket_urlpatterns)
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            classroom_ws + chat_ws
+        )
+    ),
 })
