@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ChatRoom, Message
+from .models import ChatRoom, Message, FriendRequest
 from account.models import CustomUser
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,4 +20,12 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChatRoom
-        fields = ['id', 'name', 'participants', 'messages', 'created_at'] 
+        fields = ['id', 'name', 'participants', 'messages', 'created_at']
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    from_user = UserSerializer(read_only=True)
+    to_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = FriendRequest
+        fields = ['id', 'from_user', 'to_user', 'status', 'created_at'] 
