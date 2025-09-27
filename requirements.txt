@@ -87,7 +87,7 @@ stack-data==0.6.3
 sympy==1.13.2
 tablib==3.8.0
 threadpoolctl==3.5.0
-tomli==2.2.1
+tomli
 torch==2.4.1
 tornado==6.4.1
 traitlets==5.14.3
@@ -101,4 +101,5 @@ virtualenv==20.26.3
 wcwidth==0.2.13
 whitenoise==6.9.0
 zope.interface==7.2
+
 
