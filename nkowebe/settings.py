@@ -31,8 +31,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'nkowebe.onrender.com',
     'localhost',
+    'nkowe.vercel.app',   # <-- Added this to explicitly allow the correct Vercel frontend origin
 ]
-
 
 # Application definition
 
@@ -167,6 +167,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
     "https://nkowebe.onrender.com",
     "https://nkowebe.vercel.app",
+    "https://nkowe.vercel.app",   # <-- Added correct frontend origin that was blocked
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
