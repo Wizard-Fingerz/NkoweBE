@@ -316,7 +316,7 @@ class LoginViewSet(viewsets.ModelViewSet):
                         'id': user.id,
                         'email': user.email,
                         'username': user.username,
-                        'user_type': user.user_type
+                        'user_type': user.user_type.name,
                     }
                 }, status=200)
             else:
