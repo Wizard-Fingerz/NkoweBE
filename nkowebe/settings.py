@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     '.vercel.app',
     '127.0.0.1',
     'nkowebe.onrender.com',
+    'localhost',
 ]
 
 
@@ -156,13 +157,38 @@ USE_I18N = True
 USE_TZ = True
 
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ORIGIN_ALLOW_ALL = False
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Your frontend origin
-    "http://localhost:5174",  # Your frontend origin
+    "http://localhost:5173",
+    "http://localhost:5174",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
-    # Add any other allowed origins
+    "https://nkowebe.onrender.com",
+    "https://nkowebe.vercel.app",
 ]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+    r"^https://nkowebe\.onrender\.com$",
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    # any others you need
+]
+
+# Enable HTTP & HTTPS CORS scheme
+CORS_URLS_REGEX = r"^/.*$"
 
 AUTH_USER_MODEL = 'account.CustomUser'
 
