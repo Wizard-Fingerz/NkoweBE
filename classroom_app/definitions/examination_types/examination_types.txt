@@ -1,7 +1,11 @@
 
+WAEC,West African Examinations Council Senior School Certificate Examination,Secondary,West Africa
 WASSCE,West African Senior School Certificate Examination,Secondary,West Africa
 NECO,National Examinations Council,Secondary,Nigeria
 NABTEB,National Business and Technical Examinations Board,Vocational,Nigeria
+JAMB,Joint Admissions and Matriculation Board,University Entrance,Nigeria
+PUTME,Post-UTME Screening Examination,University Entrance,Nigeria
+UME,University Matriculation Examination,University Entrance,Nigeria
 GCE,General Certificate of Education,Secondary,UK and former colonies
 A-Levels,Advanced Level qualification for university entrance,Secondary,UK
 IB,International Baccalaureate,Secondary,Global
@@ -28,3 +32,4 @@ NCLEX,Nursing licensure examination,Nursing Licensing,USA & Canada
 Bar Examination,Licensing exam to practice law,Law Licensing,Various Countries
 CPA,Certified Public Accountant,Accounting Certification,USA
 CFA,Chartered Financial Analyst,Finance Certification,Global
+

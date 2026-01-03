@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'account',
     'classroom_app',
     'chat_app',
+    'exam_app',
 ]
 
 MIDDLEWARE = [
