@@ -138,7 +138,7 @@ class GovernmentAgencySerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser 
-        fields = ('username', 'first_name', 'last_name' 'email', 'password')
+        fields = ('username', 'first_name', 'last_name', 'email', 'password')
         extra_kwargs = {
             'password': {'write_only': True},
         }
