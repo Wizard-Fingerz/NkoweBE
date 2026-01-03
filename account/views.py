@@ -285,15 +285,36 @@ class RegisterViewSet(viewsets.ModelViewSet):
     http_method_names = ['post']
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        # Autogenerate username as lowercase "lastname.firstname" (no spaces, fallback if missing fields)
+        if last_name and first_name:
+            base_username = f"{last_name}.{first_name}".replace(' ', '').lower()
+        elif first_name:
+            base_username = first_name.replace(' ', '').lower()
+        elif last_name:
+            base_username = last_name.replace(' ', '').lower()
+        else:
+            base_username = 'user'
+
+        # Ensure the username is unique
+        username = base_username
+        counter = 1
+        while CustomUser.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        data['username'] = username
+
+        serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
             token = Token.objects.get(user=user)
-            data = serializer.data
-            data['token'] = token.key
-            
-            data['user_id'] = user.id
-            return Response(data, status=status.HTTP_201_CREATED)
+            resp_data = serializer.data
+            resp_data['token'] = token.key
+            resp_data['user_id'] = user.id
+            return Response(resp_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -305,9 +326,20 @@ class LoginViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
+            username_or_email = serializer.validated_data['username_or_email']
             password = serializer.validated_data['password']
-            user = authenticate(username=username, password=password)
+
+            # Attempt to authenticate by username
+            user = authenticate(username=username_or_email, password=password)
+
+            # If not found, try email
+            if not user:
+                try:
+                    user_obj = CustomUser.objects.get(email=username_or_email)
+                    user = authenticate(username=user_obj.username, password=password)
+                except CustomUser.DoesNotExist:
+                    user = None
+
             if user:
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({
@@ -320,7 +352,7 @@ class LoginViewSet(viewsets.ModelViewSet):
                     }
                 }, status=200)
             else:
-                return Response({'message': 'Invalid username or password'}, status=401)
+                return Response({'message': 'Invalid username/email or password'}, status=401)
         else:
             return Response(serializer.errors, status=400)
 
