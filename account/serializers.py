@@ -153,5 +153,5 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+    username_or_email = serializers.CharField()
+    password = serializers.CharField(write_only=True)

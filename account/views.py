@@ -325,36 +325,35 @@ class LoginViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            username_or_email = serializer.validated_data['username_or_email']
-            password = serializer.validated_data['password']
+        serializer.is_valid(raise_exception=True)
 
-            # Attempt to authenticate by username
-            user = authenticate(username=username_or_email, password=password)
+        username_or_email = serializer.validated_data['username_or_email']
+        password = serializer.validated_data['password']
 
-            # If not found, try email
-            if not user:
-                try:
-                    user_obj = CustomUser.objects.get(email=username_or_email)
-                    user = authenticate(username=user_obj.username, password=password)
-                except CustomUser.DoesNotExist:
-                    user = None
+        user = authenticate(
+            request,
+            username=username_or_email,
+            password=password
+        )
 
-            if user:
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({
-                    'token': token.key,
-                    'user': {
-                        'id': user.id,
-                        'email': user.email,
-                        'username': user.username,
-                        'user_type': user.user_type.name,
-                    }
-                }, status=200)
-            else:
-                return Response({'message': 'Invalid username/email or password'}, status=401)
-        else:
-            return Response(serializer.errors, status=400)
+        if not user:
+            return Response(
+                {'message': 'Invalid username/email or password'},
+                status=401
+            )
+
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            'token': token.key,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'username': user.username,
+                'user_type': user.user_type.name,
+            }
+        }, status=200)
+
 
 
 class SocialLoginView(APIView):
