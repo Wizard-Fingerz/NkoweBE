@@ -46,18 +46,21 @@ class CustomPagination(pagination.PageNumberPagination):
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = CustomPagination
+    from rest_framework.authentication import TokenAuthentication
+    authentication_classes = [TokenAuthentication]
 
-    def get_queryset(self):
-        user = self.request.user
-        if not user.is_authenticated or not hasattr(user, 'user_type'):
-            return Exam.objects.none()
-        if user.user_type == 'teacher':
-            return Exam.objects.all().order_by('-year')
-        elif user.user_type == 'student':
-            return Exam.objects.filter(examination_type=user.examination_type).order_by('-year')
-        return Exam.objects.none()
+    # def get_queryset(self):
+    #     user = self.request.user
+    #     if not user.is_authenticated or not hasattr(user, 'user_type'):
+    #         return Exam.objects.all()
+    #     if user.user_type == 'teacher':
+    #         return Exam.objects.all().order_by('-year')
+    #     elif user.user_type == 'student':
+    #         # return Exam.objects.filter(examination_type=user.examination_type).order_by('-year')
+    #         return Exam.objects.all().order_by('-year')
+    #     return Exam.objects.none()
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
