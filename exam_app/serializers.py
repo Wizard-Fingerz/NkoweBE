@@ -7,14 +7,14 @@ from .models import Exam, Question, Choice, ExamAttempt, Answer
 class ChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
-        fields = ('id', 'choice_text', 'is_correct')
+        fields = ('custom_id', 'choice_text', 'is_correct')
 
 class QuestionSerializer(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True, read_only=True)
     
     class Meta:
         model = Question
-        fields = ('id', 'question_text', 'question_type', 'marks', 'order', 'choices')
+        fields = ('custom_id', 'question_text', 'question_type', 'marks', 'order', 'choices')
 
 class QuestionCreateSerializer(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True)
@@ -36,7 +36,9 @@ class ExamSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Exam
-        fields = '__all__'
+        fields = ('custom_id', 'subject', 'title', 'description', 'duration', 'total_marks',
+                  'passing_marks', 'examination_type', 'year', 'start_time', 'end_time',
+                  'is_published', 'created_at', 'updated_at', 'questions')
 
 class ExamCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,7 +64,7 @@ class ExamAttemptSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ExamAttempt
-        fields = ('id', 'exam', 'student', 'start_time', 'end_time', 'score',
+        fields = ('custom_id', 'exam', 'student', 'start_time', 'end_time', 'score',
                  'is_completed', 'answers')
         read_only_fields = ('student', 'score', 'is_completed')
 
@@ -89,4 +91,3 @@ class ScrapeQuestionsSerializer(serializers.Serializer):
     pages = serializers.IntegerField()
     slug = serializers.CharField()
     exam_type = serializers.CharField()
-     
