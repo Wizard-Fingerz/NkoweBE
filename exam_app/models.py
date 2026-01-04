@@ -71,18 +71,18 @@ class Question(models.Model):
         return f"{self.exam.title} - Question {self.order}"
 
 class Choice(models.Model):
-    custom_id = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False
-    )
+    # custom_id = models.UUIDField(
+    #     default=uuid.uuid4, editable=False
+    # )
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     choice_text = models.CharField(max_length=200, blank=True, null=True)
     is_correct = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        # Always refresh custom_id if duplicate found or missing
-        if self.custom_id is None or self.__class__.objects.filter(custom_id=self.custom_id).exclude(pk=self.pk).exists():
-            self.custom_id = generate_unique_uuid(self.__class__)
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # Always refresh custom_id if duplicate found or missing
+    #     if self.custom_id is None or self.__class__.objects.filter(custom_id=self.custom_id).exclude(pk=self.pk).exists():
+    #         self.custom_id = generate_unique_uuid(self.__class__)
+    #     super().save(*args, **kwargs)
     
     def __str__(self):
         return self.choice_text
