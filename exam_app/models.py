@@ -72,7 +72,7 @@ class Question(models.Model):
 
 class Choice(models.Model):
     custom_id = models.UUIDField(
-        default=uuid.uuid4, editable=False
+        default=uuid.uuid4, unique=True, editable=False
     )
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
     choice_text = models.CharField(max_length=200, blank=True, null=True)
