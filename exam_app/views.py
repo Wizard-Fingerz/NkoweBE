@@ -50,6 +50,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     from rest_framework.authentication import TokenAuthentication
     authentication_classes = [TokenAuthentication]
+    lookup_field = 'custom_id'
 
     # def get_queryset(self):
     #     user = self.request.user
@@ -189,13 +190,14 @@ class PracticeExamViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = PracticeExamSerializer
     permission_classes = [permissions.AllowAny]  # Allow everyone to view practice exams
+    lookup_field = 'custom_id'
 
     def get_queryset(self):
         # Only list exams that are published (for practice purposes)
         return Exam.objects.filter(is_published=True)
 
     @action(detail=True, methods=['get'])
-    def questions(self, request, pk=None):
+    def questions(self, request, custom_id=None):
         """
         Returns all practice questions for this exam, including expected answers.
         """
