@@ -62,7 +62,3 @@ class SuggestedSolutionSerializer(serializers.ModelSerializer):
     def get_total_votes(self, obj):
         return obj.total_votes()
 
-    def create(self, validated_data):
-        # The view must set user as validated_data['user'] before calling create
-        return super().create(validated_data)
-
