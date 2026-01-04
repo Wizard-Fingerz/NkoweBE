@@ -46,7 +46,7 @@ class CustomPagination(pagination.PageNumberPagination):
 
 class ExamViewSet(viewsets.ModelViewSet):
     queryset = Exam.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     pagination_class = CustomPagination
 
     def get_queryset(self):
@@ -119,7 +119,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     pagination_class = CustomPagination
 
     def get_queryset(self):
@@ -149,7 +149,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 class ExamAttemptViewSet(viewsets.ModelViewSet):
     queryset = ExamAttempt.objects.all()
     serializer_class = ExamAttemptSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return ExamAttempt.objects.filter(student=self.request.user)
