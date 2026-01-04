@@ -17,7 +17,7 @@ from .serializers import (
     ExamSerializer, ExamCreateSerializer,
     QuestionSerializer, QuestionCreateSerializer,
     ExamAttemptSerializer, ExamSubmissionSerializer, ScrapeQuestionsSerializer,
-    StaffExamCreateSerializer
+    StaffExamCreateSerializer, PracticeExamSerializer
 )
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
@@ -180,6 +180,28 @@ class ExamAttemptViewSet(viewsets.ModelViewSet):
             serializer.save(attempt=attempt)
             return Response({'status': 'submission complete'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PracticeExamViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    A viewset for listing/retrieving practice exams, including their questions and expected answers.
+    Intended for practice or study-mode quizzes, not official submissions.
+    """
+    serializer_class = PracticeExamSerializer
+    permission_classes = [permissions.AllowAny]  # Allow everyone to view practice exams
+
+    def get_queryset(self):
+        # Only list exams that are published (for practice purposes)
+        return Exam.objects.filter(is_published=True)
+
+    @action(detail=True, methods=['get'])
+    def questions(self, request, pk=None):
+        """
+        Returns all practice questions for this exam, including expected answers.
+        """
+        exam = self.get_object()
+        serializer = self.get_serializer(exam)
+        return Response(serializer.data)
 
 
 class ScrapeQuestionsViewSet(viewsets.ViewSet):

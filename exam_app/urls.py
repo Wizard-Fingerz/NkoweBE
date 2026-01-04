@@ -7,6 +7,7 @@ router.register(r'exams', views.ExamViewSet, basename='exam')
 router.register(r'questions', views.QuestionViewSet, basename='question')
 router.register(r'attempts', views.ExamAttemptViewSet, basename='attempt')
 router.register(r'scrape-questions', views.ScrapeQuestionsViewSet, basename='scrape-questions')
+router.register(r'practice-exam', views.PracticeExamViewSet, basename='practice-exam')
 # Do NOT register SchoolNgrAccountsScrapeAPIView with the router (it's an APIView, not a ViewSet).
 
 urlpatterns = [

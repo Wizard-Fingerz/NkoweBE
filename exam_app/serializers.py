@@ -14,14 +14,27 @@ class QuestionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Question
-        fields = ('custom_id', 'question_text', 'question_type', 'marks', 'order', 'choices')
+        fields = (
+            'custom_id', 
+            'question_text', 
+            'question_type', 
+            'marks', 
+            'order', 
+            'choices'
+        )
 
 class QuestionCreateSerializer(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True)
     
     class Meta:
         model = Question
-        fields = ('question_text', 'question_type', 'marks', 'order', 'choices')
+        fields = (
+            'question_text', 
+            'question_type', 
+            'marks', 
+            'order', 
+            'choices'
+        )
     
     def create(self, validated_data):
         choices_data = validated_data.pop('choices')
@@ -36,21 +49,28 @@ class ExamSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Exam
-        fields = ('custom_id', 'subject', 'title', 'description', 'duration', 'total_marks',
-                  'passing_marks', 'examination_type', 'year', 'start_time', 'end_time',
-                  'is_published', 'created_at', 'updated_at', 'questions')
+        fields = (
+            'custom_id', 'subject', 'title', 'description', 'duration', 'total_marks',
+            'passing_marks', 'examination_type', 'year', 'start_time', 'end_time',
+            'is_published', 'created_at', 'updated_at', 'questions'
+        )
 
 class ExamCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam
-        fields = ('title', 'description', 'duration', 'total_marks', 'passing_marks', 'examination_type', 'year',
-                 'start_time', 'end_time', 'is_published', 'subject')
+        fields = (
+            'title', 'description', 'duration', 'total_marks', 'passing_marks',
+            'examination_type', 'year', 'start_time', 'end_time',
+            'is_published', 'subject'
+        )
 
 class StaffExamCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exam
-        fields = ('title', 'description', 'duration', 'total_marks', 'passing_marks', 'examination_type', 'year',
-                 'start_time', 'end_time', 'is_published')
+        fields = (
+            'title', 'description', 'duration', 'total_marks', 'passing_marks',
+            'examination_type', 'year', 'start_time', 'end_time', 'is_published'
+        )
 
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,8 +84,10 @@ class ExamAttemptSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ExamAttempt
-        fields = ('custom_id', 'exam', 'student', 'start_time', 'end_time', 'score',
-                 'is_completed', 'answers')
+        fields = (
+            'custom_id', 'exam', 'student', 'start_time', 'end_time', 'score',
+            'is_completed', 'answers'
+        )
         read_only_fields = ('student', 'score', 'is_completed')
 
 class ExamSubmissionSerializer(serializers.Serializer):
@@ -83,7 +105,6 @@ class ExamSubmissionSerializer(serializers.Serializer):
             raise serializers.ValidationError("All questions must be answered.")
         
         return data
-    
 
 class ScrapeQuestionsSerializer(serializers.Serializer):
     subject = serializers.CharField()
@@ -91,3 +112,49 @@ class ScrapeQuestionsSerializer(serializers.Serializer):
     pages = serializers.IntegerField()
     slug = serializers.CharField()
     exam_type = serializers.CharField()
+
+
+# --------
+# PracticeExamSerializer for practice quizzes (with expected answer & comprehension)
+
+class PracticeExamQuestionSerializer(serializers.ModelSerializer):
+    choices = ChoiceSerializer(many=True, read_only=True)
+    expected_answer = serializers.CharField()
+    comprehension_reference = serializers.CharField()
+
+    class Meta:
+        model = Question
+        fields = (
+            'custom_id',
+            'question_text',
+            'question_type',
+            'marks',
+            'order',
+            'choices',
+            'expected_answer',
+            'comprehension_reference'
+        )
+
+class PracticeExamSerializer(serializers.ModelSerializer):
+    subject = SubjectSerializer(read_only=True)
+    questions = PracticeExamQuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Exam
+        fields = (
+            'custom_id',
+            'subject',
+            'title',
+            'description',
+            'duration',
+            'total_marks',
+            'passing_marks',
+            'examination_type',
+            'year',
+            'start_time',
+            'end_time',
+            'is_published',
+            'created_at',
+            'updated_at',
+            'questions'
+        )
