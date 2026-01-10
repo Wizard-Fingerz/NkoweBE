@@ -78,4 +78,5 @@ class LibraryCollectionSerializer(serializers.ModelSerializer):
             'owner',
             'books',
             'created_at',
+            'visibility',
         ]

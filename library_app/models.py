@@ -77,6 +77,15 @@ class LibraryCollection(models.Model):
     """
     A user-owned library collection.
     """
+    PUBLIC = 'public'
+    PRIVATE = 'private'
+    UNLISTED = 'unlisted'
+    VISIBILITY_CHOICES = [
+        (PUBLIC, 'Public'),
+        (PRIVATE, 'Private'),
+        (UNLISTED, 'Unlisted'),
+    ]
+
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     owner = models.ForeignKey(
@@ -87,6 +96,12 @@ class LibraryCollection(models.Model):
     )
     books = models.ManyToManyField(Book, related_name="collections", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    visibility = models.CharField(
+        max_length=10,
+        choices=VISIBILITY_CHOICES,
+        default=PUBLIC,
+        help_text="Who can see this collection: public, private, or unlisted (default: public)"
+    )
 
     def __str__(self):
         return f"{self.name} (owned by {self.owner.get_full_name() or self.owner.username})"
