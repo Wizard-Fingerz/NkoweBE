@@ -10,20 +10,16 @@ from library_app.catalogue.views import CatalogueViewSet
 from library_app.recommendations.views import BookRecommendationViewSet
 
 router = routers.DefaultRouter()
-router.register(r'authors', AuthorViewSet)
-router.register(r'publishers', PublisherViewSet)
-router.register(r'books', BookViewSet)
-router.register(r'members', MemberViewSet)
-router.register(r'collections', LibraryCollectionViewSet)
-router.register(r'loans', LoanViewSet)
-router.register(r'reservations', ReservationViewSet)
-router.register(r'fines', FineViewSet)
-router.register(r'catalogues', CatalogueViewSet)
-
-# Register recommendations endpoints (for recommendations sub-app)
+router.register(r'authors', AuthorViewSet, basename='author')
+router.register(r'publishers', PublisherViewSet, basename='publisher')
+router.register(r'books', BookViewSet, basename='book')
+router.register(r'members', MemberViewSet, basename='member')
+router.register(r'collections', LibraryCollectionViewSet, basename='librarycollection')
+router.register(r'loans', LoanViewSet, basename='loan')
+router.register(r'reservations', ReservationViewSet, basename='reservation')
+router.register(r'fines', FineViewSet, basename='fine')
+router.register(r'catalogues', CatalogueViewSet, basename='catalogue')
 router.register(r'recommendations/bookrecommendations', BookRecommendationViewSet, basename='bookrecommendation')
-
-# Register recently added books endpoint
 router.register(r'recently-added-books', RecentlyAddedBookViewSet, basename='recentlyaddedbook')
 
 urlpatterns = [
