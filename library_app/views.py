@@ -25,9 +25,14 @@ class MemberViewSet(viewsets.ModelViewSet):
 
 
 class LibraryCollectionViewSet(viewsets.ModelViewSet):
-    queryset = LibraryCollection.objects.all()
     serializer_class = LibraryCollectionSerializer
     pagination_class = CustomPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            return LibraryCollection.objects.filter(owner=user)
+        return LibraryCollection.objects.none()
 
 # --- Recently Added Books ViewSet ---
 class RecentlyAddedBookViewSet(viewsets.ReadOnlyModelViewSet):
