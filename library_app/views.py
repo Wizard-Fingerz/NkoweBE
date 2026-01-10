@@ -28,3 +28,12 @@ class LibraryCollectionViewSet(viewsets.ModelViewSet):
     queryset = LibraryCollection.objects.all()
     serializer_class = LibraryCollectionSerializer
     pagination_class = CustomPagination
+
+# --- Recently Added Books ViewSet ---
+class RecentlyAddedBookViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows viewing recently added books (most recent first).
+    """
+    queryset = Book.objects.order_by('-id')  # Default sorted by most recently added
+    serializer_class = BookSerializer
+    pagination_class = CustomPagination

@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.decorators import action
-
+from library_app.paginations import CustomPagination
 from library_app.recommendations.models import BookRecommendation
 from library_app.recommendations.serializers import BookRecommendationSerializer
 from library_app.recommendations.recommender import create_and_get_book_recommendations_for_user
@@ -14,6 +15,9 @@ class BookRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = BookRecommendationSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    pagination_class = CustomPagination
+    
 
     def get_queryset(self):
         # Only recommendations belonging to current user

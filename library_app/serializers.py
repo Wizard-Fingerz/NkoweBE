@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Author, Publisher, Book, Member, LibraryCollection
+from .models import Author, Publisher, Book, Member, LibraryCollection, RecentlyReadBook
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,9 +49,27 @@ class BookSerializer(serializers.ModelSerializer):
             'catalogue',
         ]
 
+class RecentlyReadBookSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    book = BookSerializer(read_only=True)
+
+    class Meta:
+        model = RecentlyReadBook
+        fields = [
+            'id',
+            'user',
+            'book',
+            'last_read_at',
+        ]
+
 class MemberSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
     institution = serializers.StringRelatedField(read_only=True)
+    recently_read_books = RecentlyReadBookSerializer(
+        many=True, 
+        read_only=True, 
+        source='user.recently_read_books'
+    )
 
     class Meta:
         model = Member
@@ -63,6 +81,7 @@ class MemberSerializer(serializers.ModelSerializer):
             'joined_date',
             'is_active',
             'institution',
+            'recently_read_books',
         ]
 
 class LibraryCollectionSerializer(serializers.ModelSerializer):

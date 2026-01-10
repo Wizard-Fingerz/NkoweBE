@@ -105,3 +105,27 @@ class LibraryCollection(models.Model):
 
     def __str__(self):
         return f"{self.name} (owned by {self.owner.get_full_name() or self.owner.username})"
+
+# --- RecentlyReadBook model for tracking recently read books by users ---
+
+class RecentlyReadBook(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="recently_read_books",
+        help_text="The user who recently read the book"
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="recently_read_by_users",
+        help_text="The book that was read"
+    )
+    last_read_at = models.DateTimeField(auto_now=True, help_text="The date and time when the book was most recently read by the user")
+
+    class Meta:
+        unique_together = ('user', 'book')
+        ordering = ['-last_read_at']
+
+    def __str__(self):
+        return f"{self.user.get_full_name() or self.user.username} read {self.book.title} on {self.last_read_at}"

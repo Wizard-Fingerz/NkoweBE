@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, permissions
+from rest_framework import serializers, viewsets, generics, permissions
 from .models import Assignment, StudentAssignment
 from .serializers import AssignmentSerializer, StudentAssignmentSerializer, StudentAssignmentSerializer
 

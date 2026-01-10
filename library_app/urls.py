@@ -1,7 +1,7 @@
 from rest_framework import routers
 from django.urls import path, include
 from .views import (
-    AuthorViewSet, PublisherViewSet, BookViewSet, MemberViewSet, LibraryCollectionViewSet
+    AuthorViewSet, PublisherViewSet, BookViewSet, MemberViewSet, LibraryCollectionViewSet, RecentlyAddedBookViewSet
 )
 from library_app.book_loan_and_reservation.views import LoanViewSet, ReservationViewSet, FineViewSet
 from library_app.catalogue.views import CatalogueViewSet
@@ -22,6 +22,9 @@ router.register(r'catalogues', CatalogueViewSet)
 
 # Register recommendations endpoints (for recommendations sub-app)
 router.register(r'recommendations/bookrecommendations', BookRecommendationViewSet, basename='bookrecommendation')
+
+# Register recently added books endpoint
+router.register(r'recently-added-books', RecentlyAddedBookViewSet, basename='recentlyaddedbook')
 
 urlpatterns = [
     path('', include(router.urls)),
