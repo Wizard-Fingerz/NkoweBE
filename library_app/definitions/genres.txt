@@ -1,0 +1,168 @@
+Fiction, Narratives created from the imagination rather than from history or fact.
+Non-Fiction, Prose writing based on facts, real events, and real people.
+Children's, Books intended for young readers.
+Young Adult, Books aimed at teens and young adults.
+Historical Fiction, Fiction set in a past time period.
+Science Fiction, Fiction based on imagined future scientific or technological advances.
+Fantasy, Fiction with magical or supernatural elements.
+Mystery, Fiction dealing with the solution of a crime or puzzle.
+Thriller, Fiction intended to excite or terrify the reader.
+Horror, Fiction meant to frighten and unsettle.
+Romance, Stories of love and romantic relationships.
+Adventure, Narratives involving exciting journeys or experiences.
+Classic, Timeless works recognized as outstanding or influential.
+Graphic Novel, Stories told in comic-strip format and published as a book.
+Satire, Literature that exposes or criticizes foolishness, often with humor or irony.
+Poetry, Literary work in verse form.
+Drama, Literature meant for theatrical performance.
+Crime, Fiction focusing on crimes and their detection.
+Detective, Stories about investigators solving crimes.
+Legal Thriller, Fiction involving the legal system and courtroom drama.
+Spy, Fiction about espionage and secret agents.
+Western, Stories set in the American frontier.
+Dystopian, Fiction set in imagined, oppressive societies.
+Utopian, Depictions of ideal societies.
+Chick Lit, Fiction for modern women, often involving humor and romance.
+Urban, Fiction set in metropolitan locations.
+Coming-of-age, Narratives about growing up.
+Short Story, Brief works of fiction.
+Anthology, Collections of works, usually by various authors.
+Fairy Tale, Stories with magical beings and events.
+Fable, Stories with animals conveying a moral.
+Mythology, Traditional sacred stories explaining a culture's worldview.
+Legend, Traditional stories sometimes rooted in historical events.
+Biography, An account of a real person's life by another.
+Autobiography, A person's life story written by themselves.
+Memoir, A historical account or biography written from personal knowledge.
+Self-Help, Books offering advice for personal improvement.
+Health & Fitness, Books about wellness, exercise, and nutrition.
+Cookbook, Collections of recipes and food-related information.
+Travel, Books detailing journeys and experiences in different locales.
+Guide, Manuals for learning or reference.
+Art, Books focusing on the visual arts.
+Photography, Books centered around the art of photography.
+Music, Books about music or musicians.
+Comics, Sequential art in periodical form.
+Humor, Books designed to amuse.
+Spirituality, Works exploring spiritual topics.
+Religion, Literature on religious beliefs and practices.
+Philosophy, Books exploring fundamental questions about existence, knowledge, values, and reason.
+Science, Books about scientific topics.
+Mathematics, Works on mathematical ideas and methods.
+Psychology, Books about the mind and behavior.
+Sociology, Books studying society and social behavior.
+Politics, Books about political systems and theories.
+Economics, Books on the production, distribution, and consumption of goods and services.
+Business, Guides and narratives on commerce and management.
+Education, Books on teaching and learning.
+Technology, Books about technological advances or explanations.
+Computers, Guides or narratives about computer science or usage.
+Sports, Works on athletic activities and sports culture.
+True Crime, Non-fiction about real criminal cases.
+War, Books themed around conflict and warfare.
+Nature, Works about the natural world.
+Animals, Books focusing on animals or animal care.
+Gardening, Guides and treatises on plants and gardening.
+Home & Garden, Books on home improvement and gardening.
+Parenting, Books about raising children.
+Crafts & Hobbies, Guides on creative and recreational pursuits.
+Reference, Encyclopedias, dictionaries, and other factual resources.
+Essay, Collections of short works on various topics.
+Journal, Personal accounts in diary or logbook format.
+LGBTQ+, Literature representing lesbian, gay, bisexual, transgender, queer, and related communities.
+Multicultural, Works representing diverse cultures.
+Epic, Long, narrative works covering heroic deeds and events.
+Folklore, Traditional beliefs, customs, and stories of a community.
+Religious Fiction, Fiction with explicit religious themes or teachings.
+Inspirational, Stories meant to motivate or uplift.
+Medical, Fiction or non-fiction about medicine or medical professionals.
+Political Thriller, Thrillers based around political intrigue.
+Cyberpunk, Science fiction featuring advanced technology and social decay.
+Steampunk, Fiction mixing historical settings with steam-powered machinery.
+Space Opera, Science fiction with space travel and adventure on a grand scale.
+Paranormal, Stories involving elements beyond scientific explanation.
+Magical Realism, Fiction blending magical elements into real-world settings.
+Noir, Fiction marked by cynicism, fatalism, and moral ambiguity.
+Bildungsroman, Literary genre focusing on the psychological and moral growth of the protagonist.
+Campus Novel, Fiction set in a university or college environment.
+Campus, Books involving school, college, or academic settings.
+Saga, Stories spanning multiple generations or long periods.
+Military Fiction, Fiction focusing on military life, strategy, and combat.
+Environmental, Works focusing on ecological and environmental themes.
+Medical Thriller, Fiction that centers around a medical crisis or threat.
+Legal, Books dealing with the law or legal matters (fiction or non-fiction).
+Sports Fiction, Fiction centered on athletic competition.
+Men's Fiction, Fiction written primarily for and about men.
+Women's Fiction, Fiction written primarily for and about women.
+Experimental, Works that experiment with style, form, or language.
+Mathematics (Primary), Math textbooks and resources for primary/elementary school students.
+Mathematics (Secondary), Math textbooks and resources for middle/high school students.
+Mathematics (College), Advanced mathematics textbooks for college/university students.
+Algebra, Textbooks and guides on algebraic concepts.
+Geometry, Books on geometric principles and applications.
+Trigonometry, Textbooks and resources on trigonometric concepts.
+Calculus, Books and textbooks on differential and integral calculus.
+Statistics, Resources and textbooks on probability and statistics.
+Science (Primary), Science textbooks and resources for primary/elementary students.
+Science (Secondary), Science for middle/high school students.
+Science (College), College-level science textbooks.
+Biology, Books and textbooks on biological sciences at all education levels.
+Chemistry, Resources and textbooks about chemistry.
+Physics, Textbooks covering concepts in physics.
+Earth Science, Textbooks about geology, meteorology, and the earth sciences.
+Environmental Science, Books focused on the environment and ecological science.
+Astronomy, Textbooks and guides on astronomy.
+Computer Science (Secondary), Computer science textbooks for secondary students.
+Computer Science (College), College/university-level computer science textbooks.
+Information Technology, Books and textbooks on computer and IT concepts.
+English Language Arts (Primary), English language arts resources for young learners.
+English Language Arts (Secondary), ELA textbooks for middle/high school students.
+English Literature, Books and anthologies for the study of literature.
+World Literature, Collections and textbooks on global literary works.
+Social Studies (Primary), Social studies textbooks for elementary grades.
+Social Studies (Secondary), Social studies textbooks for high school students.
+History, Textbooks and resources about world, regional, or national history.
+Geography, Resources and textbooks about geography.
+Civics, Textbooks on citizenship and government.
+Government, Books about government systems and political science.
+Economics (Academic), Academic textbooks and resources on economics.
+Psychology (Academic), Textbooks for psychology courses.
+Sociology (Academic), Textbooks for sociology courses.
+Philosophy (Academic), Academic philosophy textbooks.
+Languages, Guides and textbooks for learning languages.
+French, French language textbooks and resources.
+Spanish, Spanish language guides and textbooks.
+German, German language learning.
+Latin, Textbooks and references for Latin.
+Chinese, Resources for learning Chinese.
+Other Language Learning, Textbooks and reference materials for additional languages.
+Religious Studies, Academic textbooks on religion.
+Physical Education, Books and resources for PE classes.
+Art Education, Textbooks on art for school or college.
+Music Education, Music instruction books for programs or self-study.
+Business Studies, School and college-level business textbooks.
+Accounting, Accounting textbooks and resources.
+Management, Textbooks about management theory and practice.
+Marketing, Books and textbooks on marketing principles.
+Engineering, Textbooks on various engineering disciplines.
+Medicine (Textbooks), Academic medical and health science textbooks.
+Law (Textbooks), Law textbooks and resources for students.
+Test Preparation, Books and guides for standardized or entrance exams (SAT, ACT, GRE, GMAT, etc.).
+Study Guides, Books designed to aid exam and subject revision.
+Workbooks, Books filled with practice problems and assignments.
+Teacher Resources, Guides for teachers and educators to support instruction.
+Curriculum Guides, Books outlining curriculum for schools and academic programs.
+Vocational & Technical, Textbooks for trades, technical, or career-based education.
+Home Economics, Textbooks and guides on home management and consumer skills.
+Agricultural Science, Books and textbooks on agriculture.
+Educational Psychology, Books about learning theory and educational development. 
+Special Education, Resources and textbooks for special education needs.
+Ethics, Textbooks focused on ethics in various academic fields.
+STEAM, Books integrating Science, Technology, Engineering, Arts, and Mathematics.
+Handwriting, Books for learning and practicing handwriting.
+Reading, Books and textbooks on reading and literacy strategies.
+Writing, Resources for writing skills development.
+Spelling, Textbooks and workbooks for spelling.
+Early Childhood Education, Books for Pre-K and Kindergarten learners.
+Library Skills, Books about information literacy and library research.
+Textbook (General), Any textbook used for academic instruction at any educational level.
