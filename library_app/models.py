@@ -72,3 +72,21 @@ class Member(models.Model):
 
     def __str__(self):
         return self.user.get_full_name() or self.user.username
+
+class LibraryCollection(models.Model):
+    """
+    A user-owned library collection.
+    """
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    owner = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="owned_collections",
+        help_text="The user who owns this collection"
+    )
+    books = models.ManyToManyField(Book, related_name="collections", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} (owned by {self.owner.get_full_name() or self.owner.username})"

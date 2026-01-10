@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Author, Publisher, Book, Member
+from .models import Author, Publisher, Book, Member, LibraryCollection
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,4 +63,19 @@ class MemberSerializer(serializers.ModelSerializer):
             'joined_date',
             'is_active',
             'institution',
+        ]
+
+class LibraryCollectionSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField(read_only=True)
+    books = BookSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = LibraryCollection
+        fields = [
+            'id',
+            'name',
+            'description',
+            'owner',
+            'books',
+            'created_at',
         ]

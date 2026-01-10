@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Author, Publisher, Book, Member
-from .serializers import AuthorSerializer, PublisherSerializer, BookSerializer, MemberSerializer
+from .models import Author, LibraryCollection, Publisher, Book, Member
+from .serializers import AuthorSerializer, LibraryCollectionSerializer, PublisherSerializer, BookSerializer, MemberSerializer
 from .paginations import CustomPagination
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -21,4 +21,10 @@ class BookViewSet(viewsets.ModelViewSet):
 class MemberViewSet(viewsets.ModelViewSet):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
+    pagination_class = CustomPagination
+
+
+class LibraryCollectionViewSet(viewsets.ModelViewSet):
+    queryset = LibraryCollection.objects.all()
+    serializer_class = LibraryCollectionSerializer
     pagination_class = CustomPagination
