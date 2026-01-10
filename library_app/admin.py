@@ -10,11 +10,7 @@ class BookInline(admin.TabularInline):
     model = Book.authors.through
     extra = 0
 
-# Inline for RecentlyReadBook on Member detail
-class RecentlyReadBookInline(admin.TabularInline):
-    model = RecentlyReadBook
-    extra = 0
-    autocomplete_fields = ['book']
+# -- Removed RecentlyReadBookInline due to missing ForeignKey to Member --
 
 # Inline for Books in a LibraryCollection
 class LibraryCollectionBooksInline(admin.TabularInline):
@@ -62,7 +58,7 @@ class MemberAdmin(admin.ModelAdmin):
     list_display = ('user', 'phone_number', 'joined_date', 'is_active', 'institution')
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'phone_number')
     list_filter = ('joined_date', 'is_active', 'institution')
-    inlines = [RecentlyReadBookInline]
+    # Removed RecentlyReadBookInline due to missing ForeignKey
 
 @admin.register(LibraryCollection)
 class LibraryCollectionAdmin(admin.ModelAdmin):
