@@ -32,7 +32,7 @@ class LibraryCollectionViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.is_authenticated:
             return LibraryCollection.objects.filter(owner=user)
-        return LibraryCollection.objects.none()
+        return LibraryCollection.objects.all()
 
 # --- Recently Added Books ViewSet ---
 class RecentlyAddedBookViewSet(viewsets.ReadOnlyModelViewSet):
