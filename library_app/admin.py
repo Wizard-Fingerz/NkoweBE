@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Author, Publisher, Book, Member
+from .models import (
+    Author, Publisher, Book, Member, LibraryCollection, RecentlyReadBook
+)
 from library_app.definitions.models import Genre
 from library_app.catalogue.models import Catalogue
 
@@ -7,6 +9,20 @@ from library_app.catalogue.models import Catalogue
 class BookInline(admin.TabularInline):
     model = Book.authors.through
     extra = 0
+
+# Inline for RecentlyReadBook on Member detail
+class RecentlyReadBookInline(admin.TabularInline):
+    model = RecentlyReadBook
+    extra = 0
+    autocomplete_fields = ['book']
+
+# Inline for Books in a LibraryCollection
+class LibraryCollectionBooksInline(admin.TabularInline):
+    model = LibraryCollection.books.through
+    extra = 0
+    verbose_name = "Book in Collection"
+    verbose_name_plural = "Books in Collection"
+    autocomplete_fields = ['book']
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
@@ -46,6 +62,21 @@ class MemberAdmin(admin.ModelAdmin):
     list_display = ('user', 'phone_number', 'joined_date', 'is_active', 'institution')
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'phone_number')
     list_filter = ('joined_date', 'is_active', 'institution')
+    inlines = [RecentlyReadBookInline]
+
+@admin.register(LibraryCollection)
+class LibraryCollectionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner', 'created_at', 'visibility')
+    search_fields = ('name', 'owner__username', 'owner__first_name', 'owner__last_name')
+    list_filter = ('created_at', 'visibility')
+    inlines = [LibraryCollectionBooksInline]
+    exclude = ('books',)  # Since using the through-model in inline
+
+@admin.register(RecentlyReadBook)
+class RecentlyReadBookAdmin(admin.ModelAdmin):
+    list_display = ('user', 'book', 'last_read_at')
+    search_fields = ('user__username', 'book__title')
+    list_filter = ('last_read_at', 'user')
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
