@@ -7,10 +7,32 @@ from .models import DriveFolder, DriveFile
 from .serializers import DriveFolderSerializer, DriveFileSerializer, DriveTreeSerializer
 
 
+
+from rest_framework import viewsets, pagination
+
+
+class CustomPagination(pagination.PageNumberPagination):
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'num_pages': self.page.paginator.num_pages,
+            'page_size': self.page_size,
+            'current_page': self.page.number,
+            'results': data
+        })
+
+
 class DriveFolderViewSet(viewsets.ModelViewSet):
     """ViewSet for managing drive folders"""
     serializer_class = DriveFolderSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         return DriveFolder.objects.filter(owner=self.request.user)
@@ -20,9 +42,13 @@ class DriveFolderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def tree(self, request):
-        """Get the complete folder tree structure"""
-        # Get root folders (folders without parent)
-        root_folders = DriveFolder.objects.filter(owner=request.user, parent__isnull=True)
+        """Get the complete folder tree structure with pagination"""
+        root_folders = DriveFolder.objects.filter(owner=request.user, parent__isnull=True).order_by('name')
+        page = self.paginate_queryset(root_folders)
+        if page is not None:
+            serializer = DriveTreeSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
         serializer = DriveTreeSerializer(root_folders, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -45,6 +71,7 @@ class DriveFileViewSet(viewsets.ModelViewSet):
     serializer_class = DriveFileSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         return DriveFile.objects.filter(owner=self.request.user)
