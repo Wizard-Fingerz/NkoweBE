@@ -30,6 +30,7 @@ api_urlpatterns = [
     path('', include('chat_app.urls')),
     path('', include('exam_app.urls')),
     path('', include('library_app.urls')),
+    path('', include('notebook_app.urls')),
 
 ]
 
