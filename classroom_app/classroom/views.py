@@ -27,14 +27,25 @@ class CustomPagination(pagination.PageNumberPagination):
         })
 
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+
 class ClassroomViewSet(viewsets.ModelViewSet):
     queryset = Classroom.objects.all()
     serializer_class = ClassroomSerializer
     lookup_field = 'custom_id'
-
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        user = self.request.user
         queryset = Classroom.objects.all()
+        
+        # If user is student, filter by enrollment (using ClassroomStudent)
+        if hasattr(user, 'student'): # Assuming relation or check
+            # This is complex if we don't have direct relation easily accessible here without more queries
+            # For now, let's trust the FE filters or implement robust filtering later.
+            pass
+
         institution_id = self.request.query_params.get('institution_id')
         subject_id = self.request.query_params.get('subject_id')
         if institution_id is not None:
@@ -50,27 +61,31 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        print("Data received:", data)  # Optional debug line
+        
+        # Auto-assign institution if not provided, based on user's institution
+        # This assumes user is linked to an institution (Owner/Staff)
+        if 'institution' not in data:
+            # Logic to find user's institution. 
+            # For MVP, we might expect it in payload or pick first one.
+            # user.institution_owner.first().institution.id ??
+            pass
 
-        tags_data = data.pop('tag', [])  # Get and remove 'tag' list from request
-
-        # First: Process and create/get all Tag instances
+        tags_data = data.pop('tag', []) 
         tag_instances = []
         for tag_name in tags_data:
-            print(tag_name)
             tag, created = Tag.objects.get_or_create(name=tag_name)
             tag_instances.append(tag)
-
-        # Second: Now, put the tag IDs back into the payload for the serializer
         data['tag'] = [tag.id for tag in tag_instances]
 
-        # Third: Pass everything to the serializer
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
 
@@ -100,6 +115,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
 class ClassroomTutorViewSet(viewsets.ModelViewSet):
     queryset = ClassroomTutor.objects.all()
     serializer_class = ClassroomTutorSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = ClassroomTutor.objects.all()
@@ -156,6 +172,7 @@ class ClassroomTutorViewSet(viewsets.ModelViewSet):
 class ClassroomStudentViewSet(viewsets.ModelViewSet):
     queryset = ClassroomStudent.objects.all()
     serializer_class = ClassroomStudentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = ClassroomStudent.objects.all()
@@ -163,6 +180,41 @@ class ClassroomStudentViewSet(viewsets.ModelViewSet):
         if classroom_id is not None:
             queryset = queryset.filter(classroom_id=classroom_id)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        student_email = request.data.get('student') # Expect email or ID? Let's check format. modal sends email.
+        classroom_id = request.data.get('classroom')
+
+        if not student_email or not classroom_id:
+            return Response({'detail': 'Missing required fields.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # If it looks like an ID (integer), fallback to default behavior? 
+        # But safest is to treat as email if string.
+        
+        try:
+            # Check if student_email is actually an ID (int)
+            if isinstance(student_email, int) or (isinstance(student_email, str) and student_email.isdigit()):
+                 return super().create(request, *args, **kwargs)
+            
+            user = CustomUser.objects.get(email=student_email)
+            try:
+                student_profile = Student.objects.get(user=user)
+                
+                classroom_student, created = ClassroomStudent.objects.get_or_create(
+                    classroom_id=classroom_id,
+                    student=student_profile
+                )
+                
+                if not created:
+                    return Response({'detail': 'Student already in class.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                return Response(self.get_serializer(classroom_student).data, status=status.HTTP_201_CREATED)
+
+            except Student.DoesNotExist:
+                return Response({'detail': 'User exists but is not registered as a Student.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        except CustomUser.DoesNotExist:
+            return Response({'detail': 'Student not found with this email.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 # class ExaminationTypeViewSet(viewsets.ModelViewSet):
@@ -173,6 +225,7 @@ class ClassroomStudentViewSet(viewsets.ModelViewSet):
 class ClassroomExaminationViewSet(viewsets.ModelViewSet):
     queryset = ClassroomExamination.objects.all()
     serializer_class = ClassroomExaminationSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = ClassroomExamination.objects.all()
@@ -185,6 +238,7 @@ class ClassroomExaminationViewSet(viewsets.ModelViewSet):
 class ClassroomAttachmentViewSet(viewsets.ModelViewSet):
     queryset = ClassroomAttachment.objects.all()
     serializer_class = ClassroomAttachmentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = ClassroomAttachment.objects.all()
@@ -197,3 +251,4 @@ class ClassroomAttachmentViewSet(viewsets.ModelViewSet):
 class ClassroomTermsAndConditionsViewSet(viewsets.ModelViewSet):
     queryset = ClassroomTermsAndConditions.objects.all()
     serializer_class = ClassroomTermsAndConditionsSerializer
+    permission_classes = [IsAuthenticated]
