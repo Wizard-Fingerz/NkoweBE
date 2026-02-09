@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from classroom_app.classchat.views import ClassroomMessageViewSet
 from classroom_app.classroom.views import ClassroomTermsAndConditionsViewSet
-from classroom_app.institution.views import InstitutionViewSet
+from classroom_app.institution.views import InstitutionViewSet, JobVacancyViewSet, InstitutionEnrollmentViewSet
 from classroom_app.assignment.views import AssignmentViewSet
 from classroom_app.assignment.views import StudentAssignmentCreateUpdateView
 from classroom_app.assignment.views import StudentAssignmentDetailView
@@ -16,6 +16,8 @@ from .views import ClassroomViewSet, ClassroomTutorViewSet, ClassroomStudentView
 router = routers.DefaultRouter()
 router.register(r'classrooms', ClassroomViewSet, basename='classrooms')
 router.register(r'institution', InstitutionViewSet, basename='institution')
+router.register(r'job-vacancies', JobVacancyViewSet, basename='job-vacancies')
+router.register(r'institution-enrollment', InstitutionEnrollmentViewSet, basename='institution-enrollment')
 router.register(r'institution-types', InstitutionTypeViewSet, basename='institution_type')
 router.register(r'subjects', SubjectViewSet, basename='subjects')
 router.register(r'classroom-tutors', ClassroomTutorViewSet, basename='classroom_tutors')
