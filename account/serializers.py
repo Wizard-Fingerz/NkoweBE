@@ -64,6 +64,14 @@ class DetailedTeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = "__all__"
+
+
+class DetailedAdministratorSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True)
+
+    class Meta:
+        model = Administrator
+        fields = "__all__"
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student

@@ -2,6 +2,7 @@ from django.db import transaction
 from .serializers import (
     DetailedStudentSerializer,
     DetailedTeacherSerializer,
+    DetailedAdministratorSerializer,
     LoginSerializer,
     RegisterSerializer,
     TeacherSerializer,
@@ -179,6 +180,39 @@ class AdministratorViewSet(viewsets.ModelViewSet):
             if user.user_type == 'administrator':
                 queryset = queryset.filter(user=user)
         return queryset
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create an Administrator profile for the currently authenticated user.
+        The `user` OneToOne field is automatically set to `request.user`.
+        """
+        # Force the profile to be linked to the logged-in user
+        data = request.data.copy()
+        data['user'] = request.user.id
+
+        # Optionally keep CustomUser in sync with provided details
+        user = request.user
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+
+        # Ensure the user_type is set to "Administrator"
+        try:
+            admin_type = UserType.objects.get(name='Administrator')
+            user.user_type = admin_type
+        except UserType.DoesNotExist:
+            pass
+
+        user.save()
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class LibrarianViewSet(viewsets.ModelViewSet):
@@ -421,6 +455,13 @@ class ProfileView(APIView):
                 serializer = DetailedTeacherSerializer(profile)
             except Teacher.DoesNotExist:
                 return Response({'detail': 'Teacher profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        elif str(user_type).lower() == 'administrator':
+            try:
+                profile = Administrator.objects.get(user=user)
+                serializer = DetailedAdministratorSerializer(profile)
+            except Administrator.DoesNotExist:
+                return Response({'detail': 'Administrator profile not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Add more user types as needed
         # elif str(user_type).lower() == 'counselor':
