@@ -4,12 +4,30 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from django.utils.crypto import get_random_string
 
 from classroom_app.institution.models import Institution, JobVacancy
 from classroom_app.institution.serializers import InstitutionSerializer, JobVacancySerializer, StudentEnrollmentSerializer, StaffEnrollmentSerializer
 from account.models import CustomUser, Student, InstitutionalOwner, Tutor, Teacher, Counselor, Administrator, Librarian, ITStaff, Alumni, GuestLecturer, Mentor, ResearchPartner, GovernmentAgency, Title
 from django.db.models import Q
 # Create your views here.
+
+
+def user_can_manage_institution(user, institution):
+    """
+    True if `user` is the institution's registered owner, or holds an
+    Administrator staff profile at this institution. Both enrollment actions
+    below previously had NO authorization check at all — the code literally
+    said "Check permissions: User must be owner or admin of the institution
+    - skipped for brevity/MVP, but essential for prod" and then didn't do it,
+    so any authenticated user could enroll students or staff into ANY
+    institution, not just their own.
+    """
+    if InstitutionalOwner.objects.filter(user=user, institution=institution).exists():
+        return True
+    if Administrator.objects.filter(user=user, institutions=institution).exists():
+        return True
+    return False
 
 
 
@@ -77,14 +95,14 @@ class InstitutionEnrollmentViewSet(viewsets.ViewSet):
             institution = Institution.objects.get(pk=pk)
         except Institution.DoesNotExist:
             return Response({"error": "Institution not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Check permissions: User must be owner or admin of the institution
-        # skipped for brevity/MVP, but essential for prod.
-        
+
+        if not user_can_manage_institution(request.user, institution):
+            return Response({"error": "You do not have permission to enroll students into this institution."}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = StudentEnrollmentSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data
-            
+
             # Check if user exists
             email = data.get('email')
             user, created = CustomUser.objects.get_or_create(email=email, defaults={
@@ -93,7 +111,14 @@ class InstitutionEnrollmentViewSet(viewsets.ViewSet):
                 'last_name': data.get('last_name')
             })
             if created:
-                password = data.get('password') or "DefaultPassword123!" # Should generate random or send invite
+                # A caller-supplied password is honored if given (e.g. the
+                # institution collected one from the student directly);
+                # otherwise a random one is generated instead of the
+                # previous hardcoded "DefaultPassword123!", which meant
+                # every auto-created account shared the same publicly known
+                # password until (if ever) changed. This is still a stopgap:
+                # the proper fix is an invite/password-reset email flow.
+                password = data.get('password') or get_random_string(16)
                 user.set_password(password)
                 user.save()
             
@@ -120,18 +145,23 @@ class InstitutionEnrollmentViewSet(viewsets.ViewSet):
         except Institution.DoesNotExist:
             return Response({"error": "Institution not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        if not user_can_manage_institution(request.user, institution):
+            return Response({"error": "You do not have permission to enroll staff into this institution."}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = StaffEnrollmentSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data
             email = data.get('email')
-            
+
             user, created = CustomUser.objects.get_or_create(email=email, defaults={
                 'username': email,
                 'first_name': data.get('first_name'),
                 'last_name': data.get('last_name')
             })
             if created:
-                password = data.get('password') or "DefaultPassword123!"
+                # See the identical note in enroll_student above: no more
+                # shared hardcoded default password.
+                password = data.get('password') or get_random_string(16)
                 user.set_password(password)
                 user.save()
 

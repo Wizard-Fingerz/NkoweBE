@@ -3,18 +3,44 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Announcement, ClassroomMessage, Classroom, Reply
 from account.models import CustomUser
+from classroom_app.classroom.models import ClassroomStudent, ClassroomTutor
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    # SECURITY: this consumer previously had no authentication or
+    # membership check at all on connect() — anyone (even an unauthenticated
+    # client) could join ws/classroom/<any classroom_id>/ and immediately
+    # receive that classroom's full chat history and every announcement +
+    # reply (attachment URLs included). receive() then trusted a
+    # client-supplied `sender_id` for every message/announcement/reply,
+    # letting any connected client post AS ANY OTHER USER — e.g. a student
+    # posting an "announcement" that appears to come from a teacher. Both
+    # are fixed below: connect() now requires authentication and classroom
+    # membership, and every "who is acting" value comes from self.user,
+    # never from client input. Mirrors the same fix in
+    # chat_app/consumers.py.
+
     async def connect(self):
         self.classroom_id = self.scope['url_route']['kwargs']['classroom_id']
         self.room_group_name = f'classroom_{self.classroom_id}'
+        self.user = self.scope['user']
+        self.joined_room_group = False
+
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        is_member = await self.is_classroom_member(self.classroom_id, self.user)
+        if not is_member:
+            await self.close()
+            return
 
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
+        self.joined_room_group = True
 
         await self.accept()
 
@@ -34,35 +60,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    # Receive message from WebSocket
-    # async def receive(self, text_data):
-    #     data = json.loads(text_data)
-    #     message = data['message']
-       
+        if self.joined_room_group:
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
 
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data.get("type")  # can be 'chat', 'announcement', or 'reply'
 
-
-        
         classroom = await self.get_classroom(self.classroom_id)
-        sender = await self.get_user(data['sender_id'])
-
-        print(sender)
-
+        sender = self.user
 
         if message_type == "announcement":
             announcement = await self.create_announcement(
                 data['message'],         # message
-                data['sender_id']        # sender
+                sender.id                # sender — from the authenticated connection, not the client
             )
-            print(announcement)
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -78,7 +93,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif message_type == "reply":
             announcement_id = data["announcement_id"]
             reply = await self.create_reply(
-                data["sender_id"], announcement_id, data["message"]
+                sender.id, announcement_id, data["message"]
             )
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -96,7 +111,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         else:
             # Fallback to default chat
-            
+
             new_message = await self.create_message(classroom, sender, data['message'])
 
             await self.channel_layer.group_send(
@@ -138,13 +153,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def get_classroom(self, classroom_id):
-        return Classroom.objects.get(custom_id=classroom_id)
+    def is_classroom_member(self, classroom_id, user):
+        """True if `user` is enrolled as a student or assigned as a tutor
+        in this classroom, or is staff/superuser."""
+        if user.is_staff or user.is_superuser:
+            return True
+        if ClassroomStudent.objects.filter(classroom__custom_id=classroom_id, student__user=user).exists():
+            return True
+        if ClassroomTutor.objects.filter(classroom__custom_id=classroom_id, tutor__user=user).exists():
+            return True
+        return False
 
     @database_sync_to_async
-    def get_user(self, user_id):
-        print(user_id)
-        return CustomUser.objects.get(id=user_id)
+    def get_classroom(self, classroom_id):
+        return Classroom.objects.get(custom_id=classroom_id)
 
     @database_sync_to_async
     def create_message(self, classroom, sender, message):

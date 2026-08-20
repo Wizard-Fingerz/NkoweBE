@@ -79,6 +79,10 @@ INSTALLED_APPS = [
     'library_app',
     'notebook_app',
     'drives_app',
+    # New Nkowe Core domain layer (LearnerIdentity, LearningJourney,
+    # Enrollment, LearnerRecordEvent) — additive, strangler-fig migration
+    # target. See nkowe_core/models.py and the forensic audit §10-16.
+    'nkowe_core',
 ]
 
 MIDDLEWARE = [
@@ -113,16 +117,41 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'nkowebe.wsgi.application'
 
-# Set ASGI application
-# ASGI_APPLICATION = "nkowebe.asgi.application"
+# ASGI_APPLICATION tells Channels (and `manage.py runserver`, once the
+# `channels` app is installed) which application to route through for
+# WebSocket support. Production already runs correctly today because the
+# PROCFILE invokes Daphne directly against nkowebe.asgi:application, but
+# leaving this unset broke local development: `python manage.py runserver`
+# would never route /ws/... connections to Channels at all.
+ASGI_APPLICATION = "nkowebe.asgi.application"
 
-
-# Channel layers (for Redis backend)
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+# Channel layer: uses Redis when REDIS_URL is configured, otherwise falls
+# back to the in-process layer for local development.
+#
+# InMemoryChannelLayer only delivers group_send() messages to consumers
+# connected to the SAME process. That's fine for a single local dev
+# process, but it silently breaks cross-user delivery (chat messages,
+# friend-request notifications, classroom announcements) the moment
+# production runs more than one worker process, since two users connected
+# to different processes can never reach each other — with no error, just
+# messages that never arrive. Set REDIS_URL in production before scaling
+# past a single web process.
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        }
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
 
 
 AUTHENTICATION_BACKENDS = [

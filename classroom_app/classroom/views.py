@@ -7,6 +7,44 @@ from .models import Classroom, ClassroomTermsAndConditions, ClassroomTutor, Clas
 from .serializers import ClassroomSerializer, ClassroomTermsAndConditionsSerializer, ClassroomTutorSerializer, ClassroomStudentSerializer, DetailedClassroomSerializer, ExaminationTypeSerializer, ClassroomExaminationSerializer, ClassroomAttachmentSerializer
 
 
+def user_classroom_ids(user):
+    """
+    IDs of classrooms `user` actually belongs to, as an enrolled student or
+    an assigned tutor/teacher. Returns None for staff/superusers as a
+    sentinel meaning "no restriction — can see every classroom".
+
+    ClassroomStudentViewSet, ClassroomTutorViewSet, ClassroomExaminationViewSet,
+    and ClassroomAttachmentViewSet previously required only IsAuthenticated
+    and filtered solely by an optional `classroom_id` query param, with no
+    check that the requesting user actually belonged to that classroom — any
+    authenticated user could read (and, being ModelViewSets, write) another
+    classroom's student roster, tutor roster, exams, or attachments simply by
+    passing its ID, or see every classroom's data at once by omitting it.
+    """
+    if user.is_staff or user.is_superuser:
+        return None
+    return (
+        Classroom.objects.filter(classroomstudent__student__user=user) |
+        Classroom.objects.filter(classroomtutor__tutor__user=user)
+    ).values_list('id', flat=True).distinct()
+
+
+def scoped_by_classroom_membership(queryset, user, classroom_id_param):
+    """
+    Restricts `queryset` (a model with a `classroom` FK) to classrooms the
+    user belongs to, then further narrows by an optional classroom_id query
+    param. If classroom_id_param names a classroom the user isn't a member
+    of, the membership filter already excludes it, so the result is empty
+    rather than leaking that classroom's data.
+    """
+    allowed_ids = user_classroom_ids(user)
+    if allowed_ids is not None:
+        queryset = queryset.filter(classroom_id__in=allowed_ids)
+    if classroom_id_param is not None:
+        queryset = queryset.filter(classroom_id=classroom_id_param)
+    return queryset
+
+
 from rest_framework import viewsets, pagination
 
 
@@ -39,12 +77,19 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = Classroom.objects.all()
-        
-        # If user is student, filter by enrollment (using ClassroomStudent)
-        if hasattr(user, 'student'): # Assuming relation or check
-            # This is complex if we don't have direct relation easily accessible here without more queries
-            # For now, let's trust the FE filters or implement robust filtering later.
-            pass
+
+        # NOTE: this list/retrieve endpoint is intentionally catalog-style —
+        # any authenticated user can browse classroom listings (filtered by
+        # institution/subject below), same as Book/Author in library_app.
+        # This used to contain a no-op `if hasattr(user, 'student'): pass`
+        # block that looked like it scoped results to the student's own
+        # enrollment but did nothing at all; it's removed here since dead
+        # code that looks like an access check is worse than no comment.
+        # The actual per-classroom data that needs real membership scoping —
+        # rosters, tutor assignments, exams, attachments — is locked down in
+        # ClassroomStudentViewSet/ClassroomTutorViewSet/
+        # ClassroomExaminationViewSet/ClassroomAttachmentViewSet below via
+        # scoped_by_classroom_membership().
 
         institution_id = self.request.query_params.get('institution_id')
         subject_id = self.request.query_params.get('subject_id')
@@ -118,11 +163,10 @@ class ClassroomTutorViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ClassroomTutor.objects.all()
         classroom_id = self.request.query_params.get('classroom_id')
-        if classroom_id:
-            queryset = queryset.filter(classroom_id=classroom_id)
-        return queryset
+        return scoped_by_classroom_membership(
+            ClassroomTutor.objects.all(), self.request.user, classroom_id
+        )
 
     def create(self, request, *args, **kwargs):
         tutor_email = request.data.get('tutor')
@@ -175,11 +219,10 @@ class ClassroomStudentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ClassroomStudent.objects.all()
         classroom_id = self.request.query_params.get('classroom_id')
-        if classroom_id is not None:
-            queryset = queryset.filter(classroom_id=classroom_id)
-        return queryset
+        return scoped_by_classroom_membership(
+            ClassroomStudent.objects.all(), self.request.user, classroom_id
+        )
 
     def create(self, request, *args, **kwargs):
         student_email = request.data.get('student') # Expect email or ID? Let's check format. modal sends email.
@@ -228,11 +271,10 @@ class ClassroomExaminationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ClassroomExamination.objects.all()
         classroom_id = self.request.query_params.get('classroom_id')
-        if classroom_id is not None:
-            queryset = queryset.filter(classroom_id=classroom_id)
-        return queryset
+        return scoped_by_classroom_membership(
+            ClassroomExamination.objects.all(), self.request.user, classroom_id
+        )
 
 
 class ClassroomAttachmentViewSet(viewsets.ModelViewSet):
@@ -241,11 +283,10 @@ class ClassroomAttachmentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ClassroomAttachment.objects.all()
         classroom_id = self.request.query_params.get('classroom_id')
-        if classroom_id is not None:
-            queryset = queryset.filter(classroom_id=classroom_id)
-        return queryset
+        return scoped_by_classroom_membership(
+            ClassroomAttachment.objects.all(), self.request.user, classroom_id
+        )
 
 
 class ClassroomTermsAndConditionsViewSet(viewsets.ModelViewSet):

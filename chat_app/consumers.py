@@ -8,22 +8,36 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = f'chat_{self.room_id}'
-
-        # Add user-specific group for friend notifications
         self.user = self.scope['user']
-        if self.user.is_authenticated:
-            self.user_group_name = f'user_{self.user.id}'
-            await self.channel_layer.group_add(
-                self.user_group_name,
-                self.channel_name
-            )
-        else:
-            self.user_group_name = None
+        self.user_group_name = None
+        self.joined_room_group = False
+
+        # SECURITY: previously any WebSocket connection — authenticated or
+        # not — was accepted and joined to room_group_name for whatever
+        # room_id the client requested, with no check that the connecting
+        # user was actually a participant of that room. That let anyone
+        # read another room's full chat history and live messages simply by
+        # connecting to its room_id. Both checks below are new.
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        is_participant = await self.is_room_participant(self.room_id, self.user)
+        if not is_participant:
+            await self.close()
+            return
+
+        self.user_group_name = f'user_{self.user.id}'
+        await self.channel_layer.group_add(
+            self.user_group_name,
+            self.channel_name
+        )
 
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
+        self.joined_room_group = True
         await self.accept()
 
         # Send chat history
@@ -34,10 +48,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        if self.joined_room_group:
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
         if self.user_group_name:
             await self.channel_layer.group_discard(
                 self.user_group_name,
@@ -45,12 +60,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     async def receive(self, text_data):
+        # SECURITY: every branch below used to take the acting user's ID
+        # (sender_id / from_user_id / user_id) directly from client-supplied
+        # JSON instead of the authenticated connection (self.user). Any
+        # connected client could send messages, create/accept/reject friend
+        # requests, or read a friend list AS ANY OTHER USER simply by
+        # putting a different ID in the payload — a full authorization
+        # bypass that also sidestepped the ownership checks already present
+        # in the REST FriendRequestViewSet (accept/reject requiring
+        # to_user == request.user). Every "which user is acting" value below
+        # now comes from self.user, never from client input.
         data = json.loads(text_data)
         msg_type = data.get('type', 'chat')
         if msg_type == 'chat':
-            sender_id = data['sender_id']
             content = data['content']
-            sender = await self.get_user(sender_id)
+            sender = self.user
             room = await self.get_room(self.room_id)
             message = await self.create_message(room, sender, content)
             await self.channel_layer.group_send(
@@ -66,7 +90,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         elif msg_type == 'friend_request':
-            from_user_id = data['from_user_id']
+            from_user_id = self.user.id
             to_user_id = data['to_user_id']
             friend_request = await self.create_friend_request(from_user_id, to_user_id)
             # Notify the recipient
@@ -85,7 +109,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         elif msg_type == 'friend_accept':
             request_id = data['request_id']
-            friend_request = await self.accept_friend_request(request_id)
+            friend_request = await self.accept_friend_request(request_id, self.user.id)
+            if friend_request is None:
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'detail': 'Not allowed to accept this friend request.',
+                }))
+                return
             # Notify both users
             await self.channel_layer.group_send(
                 f'user_{friend_request.from_user.id}',
@@ -115,7 +145,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         elif msg_type == 'friend_reject':
             request_id = data['request_id']
-            friend_request = await self.reject_friend_request(request_id)
+            friend_request = await self.reject_friend_request(request_id, self.user.id)
+            if friend_request is None:
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'detail': 'Not allowed to reject this friend request.',
+                }))
+                return
             # Notify the sender
             await self.channel_layer.group_send(
                 f'user_{friend_request.from_user.id}',
@@ -131,8 +167,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         elif msg_type == 'friend_list':
-            user_id = data['user_id']
-            friends = await self.get_friends(user_id)
+            friends = await self.get_friends(self.user.id)
             await self.send(text_data=json.dumps({
                 'type': 'friend_list',
                 'friends': friends,
@@ -161,6 +196,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type': 'friend_reject',
             'friend_request': event['friend_request']
         }))
+
+    @database_sync_to_async
+    def is_room_participant(self, room_id, user):
+        return ChatRoom.objects.filter(id=room_id, participants=user).exists()
 
     @database_sync_to_async
     def get_room(self, room_id):
@@ -198,15 +237,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return friend_request
 
     @database_sync_to_async
-    def accept_friend_request(self, request_id):
+    def accept_friend_request(self, request_id, acting_user_id):
+        """Returns None (instead of raising) if the acting user isn't the
+        request's recipient — mirrors the check already enforced by
+        FriendRequestViewSet.accept() over REST."""
         friend_request = FriendRequest.objects.get(id=request_id)
+        if friend_request.to_user_id != acting_user_id:
+            return None
         friend_request.status = 'accepted'
         friend_request.save()
         return friend_request
 
     @database_sync_to_async
-    def reject_friend_request(self, request_id):
+    def reject_friend_request(self, request_id, acting_user_id):
+        """Returns None (instead of raising) if the acting user isn't the
+        request's recipient — mirrors the check already enforced by
+        FriendRequestViewSet.reject() over REST."""
         friend_request = FriendRequest.objects.get(id=request_id)
+        if friend_request.to_user_id != acting_user_id:
+            return None
         friend_request.status = 'rejected'
         friend_request.save()
         return friend_request
