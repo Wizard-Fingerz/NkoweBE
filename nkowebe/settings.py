@@ -27,10 +27,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-mhwo6vx)waf#lgdo9-^(8)hpg&@4+tl2t^#vz+@i!-pdm8sw1r'
+# The previous hardcoded key was committed to source control and must be treated as
+# permanently compromised. SECRET_KEY now MUST come from the environment. The fallback
+# below only fires for local development and is intentionally obviously insecure so it
+# can never be mistaken for a real key if it leaks into a deployed environment.
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-LOCAL-DEV-ONLY-set-DJANGO_SECRET_KEY-env-var-for-real-use',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Defaults to False now; set DJANGO_DEBUG=True explicitly in your local .env for development.
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').strip().lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = [
     '.vercel.app',
@@ -133,10 +141,16 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
-    # Optionally, you can set default permission classes if desired, e.g.:
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
+    # SECURITY: default-deny. Previously unset, which meant DRF's own default
+    # (AllowAny) applied to any viewset that forgot to set permission_classes —
+    # this is how several endpoints (custom-users, questions, exam attempts,
+    # books, members, loans, etc.) ended up world-readable/writable with no
+    # authentication at all. Every view that must be public now sets
+    # permission_classes = [AllowAny] explicitly, so it's an intentional,
+    # visible choice rather than an accident.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 # Database

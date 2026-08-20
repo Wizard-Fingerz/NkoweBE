@@ -24,6 +24,22 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 
+def user_has_type(user, type_name):
+    """
+    Safely check a CustomUser's role. `user_type` is a ForeignKey to
+    UserType, not a string — comparing it directly to a string literal
+    (e.g. `user.user_type == 'teacher'`) is always False in both directions.
+    That bug previously made every "only teachers can do X" check in this
+    file evaluate as "no one can do X" (perform_create/update/destroy and
+    the analytics action all unconditionally raised PermissionDenied for
+    real teachers), while get_serializer_class's identical check silently
+    always fell through to the non-staff serializer. Mirrors the same
+    helper in account/views.py.
+    """
+    ut = getattr(user, 'user_type', None)
+    return bool(ut and ut.name.lower() == type_name.lower())
+
+
 # Custom Pagination remains unchanged
 
 
@@ -65,7 +81,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
-            if self.request.user.user_type == 'teacher':
+            if user_has_type(self.request.user, 'teacher'):
                 return StaffExamCreateSerializer if self.action == 'create' else ExamCreateSerializer
             return ExamCreateSerializer
         return ExamSerializer
@@ -73,7 +89,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         subject_id = self.request.data.get('subject')
-        if user.user_type != 'teacher':
+        if not user_has_type(user, 'teacher'):
             raise PermissionDenied("Only teachers can create exams.")
         if not subject_id:
             raise PermissionDenied("Subject ID is required.")
@@ -86,14 +102,14 @@ class ExamViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         instance = self.get_object()
-        if user.user_type != 'teacher' or getattr(instance.subject, 'instructor', None) != user:
+        if not user_has_type(user, 'teacher') or getattr(instance.subject, 'instructor', None) != user:
             raise PermissionDenied(
                 "Only the subject instructor can update the exam.")
         serializer.save()
 
     def perform_destroy(self, instance):
         user = self.request.user
-        if user.user_type != 'teacher' or getattr(instance.subject, 'instructor', None) != user:
+        if not user_has_type(user, 'teacher') or getattr(instance.subject, 'instructor', None) != user:
             raise PermissionDenied(
                 "Only the subject instructor can delete the exam.")
         instance.delete()
@@ -102,7 +118,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     def analytics(self, request, pk=None):
         exam = self.get_object()
         user = request.user
-        if user.user_type != 'teacher' or getattr(exam.subject, 'instructor', None) != user:
+        if not user_has_type(user, 'teacher') or getattr(exam.subject, 'instructor', None) != user:
             return Response({"detail": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
 
         attempts = ExamAttempt.objects.filter(exam=exam)
@@ -123,7 +139,7 @@ class ExamViewSet(viewsets.ModelViewSet):
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = CustomPagination
 
     def get_queryset(self):
@@ -153,7 +169,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 class ExamAttemptViewSet(viewsets.ModelViewSet):
     queryset = ExamAttempt.objects.all()
     serializer_class = ExamAttemptSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return ExamAttempt.objects.filter(student=self.request.user)
@@ -207,8 +223,16 @@ class PracticeExamViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ScrapeQuestionsViewSet(viewsets.ViewSet):
-    authentication_classes = []
-    permission_classes = [AllowAny]
+    """
+    Triggers server-side outbound HTTP scraping of an attacker-influenceable
+    URL and writes the results to the database and a CSV file. This was
+    previously fully unauthenticated (authentication_classes = [],
+    permission_classes = [AllowAny]) — any anonymous caller on the internet
+    could make this server issue arbitrary outbound requests (an SSRF
+    vector) and flood the database with bogus Exam/Question/Choice rows.
+    Restricted to Django staff/superusers.
+    """
+    permission_classes = [permissions.IsAdminUser]
 
     @swagger_auto_schema(request_body=ScrapeQuestionsSerializer)
     @action(detail=False, methods=['post'], url_path="scrape", url_name="scrape_questions")
@@ -391,8 +415,12 @@ class SchoolNgrAccountsScrapeAPIView(APIView):
             "year": "Mixed"
         }
     - base_url MUST include "{page_num}" as its page number placeholder.
+
+    SECURITY: base_url is entirely caller-controlled and this server fetches
+    it directly (an SSRF vector), so — same reasoning as ScrapeQuestionsViewSet
+    above — this was previously AllowAny and is now restricted to staff.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
 
     def parse_exam_type_and_subject_from_url(self, url):
         """

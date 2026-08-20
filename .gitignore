@@ -3,3 +3,11 @@ venv/
 wslvenv/
 
 .env
+*.pyc
+__pycache__/
+db.sqlite3
+staticfiles/
+media/
+!media/.gitkeep
+.DS_Store
+*.log

@@ -1,11 +1,17 @@
 # views.py
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
 from .models import MailTemplate
 from .serializers import MailTemplateSerializer
 from django.core.mail import send_mass_mail
 
 class SendMassEmailView(APIView):
+    # Was fully open (no permission_classes) — anyone on the internet could
+    # trigger a mass email blast to any list of addresses they supplied,
+    # using this server's mail credentials. Restricted to staff/superusers.
+    permission_classes = [IsAdminUser]
+
     def post(self, request):
         mail_template_id = request.data.get('mail_template_id')
         emails = request.data.get('emails')

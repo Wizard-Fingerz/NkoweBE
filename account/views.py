@@ -31,7 +31,7 @@ from .models import (
     GovernmentAgency,
     UserType,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
@@ -48,14 +48,46 @@ from classroom_app.classroom.models import Classroom, ClassroomStudent
 from classroom_app.assignment.models import Assignment, StudentAssignment
 
 
+def user_has_type(user, type_name):
+    """
+    Safely check a CustomUser's role.
+
+    `user_type` is a ForeignKey to UserType, not a string — comparing it
+    directly to a string literal (e.g. `user.user_type == 'teacher'`) is
+    always False in both directions and was silently disabling every
+    "only see your own records" filter in this file, while simultaneously
+    blocking legitimate teachers/admins from actions gated the same way.
+    Use this helper everywhere a role check is needed instead.
+    """
+    ut = getattr(user, 'user_type', None)
+    return bool(ut and ut.name.lower() == type_name.lower())
+
+
 class CustomUserViewSet(viewsets.ModelViewSet):
+    """
+    Full user-account records. This previously had NO permission_classes at
+    all, which — combined with no project-wide DEFAULT_PERMISSION_CLASSES —
+    meant anyone on the internet could list, create, update, or delete any
+    user account with no authentication. Restricted to authenticated users,
+    and non-staff users are further restricted to their own record.
+    """
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return CustomUser.objects.all()
+        return CustomUser.objects.filter(pk=user.pk)
 
 
 class AdminViewSet(viewsets.ModelViewSet):
+    # Was fully open (no permission_classes). Admin-profile management is
+    # restricted to Django staff/superusers.
     queryset = Admin.objects.all()
     serializer_class = AdminSerializer
+    permission_classes = [IsAdminUser]
 
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -94,18 +126,25 @@ class StudentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)  
         
 class InstitutionOwnerViewSet(viewsets.ModelViewSet):
+    # Was fully open (no permission_classes).
     queryset = InstitutionalOwner.objects.all()
     serializer_class = InstitutionOwnerSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class TutorViewSet(viewsets.ModelViewSet):
+    # Was fully open (no permission_classes).
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class ModeratorViewSet(viewsets.ModelViewSet):
+    # Was fully open (no permission_classes). Moderator-profile management is
+    # restricted to Django staff/superusers, same as AdminViewSet.
     queryset = Moderator.objects.all()
     serializer_class = ModeratorSerializer
+    permission_classes = [IsAdminUser]
 
 # views.py
 
@@ -120,10 +159,10 @@ class TeacherViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'teacher':
+            if user_has_type(user, 'teacher'):
                 queryset = queryset.filter(user=user)
         return queryset
-    
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return DetailedTeacherSerializer
@@ -163,7 +202,7 @@ class CounselorViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'counselor':
+            if user_has_type(user, 'counselor'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -177,7 +216,7 @@ class AdministratorViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'administrator':
+            if user_has_type(user, 'administrator'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -224,7 +263,7 @@ class LibrarianViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'librarian':
+            if user_has_type(user, 'librarian'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -238,7 +277,7 @@ class ITStaffViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'it_staff':
+            if user_has_type(user, 'it_staff'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -252,7 +291,7 @@ class AlumniViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'alumni':
+            if user_has_type(user, 'alumni'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -266,7 +305,7 @@ class GuestLecturerViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'guest_lecturer':
+            if user_has_type(user, 'guest_lecturer'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -280,7 +319,7 @@ class MentorViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'mentor':
+            if user_has_type(user, 'mentor'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -294,7 +333,7 @@ class ResearchPartnerViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'research_partner':
+            if user_has_type(user, 'research_partner'):
                 queryset = queryset.filter(user=user)
         return queryset
 
@@ -308,14 +347,18 @@ class GovernmentAgencyViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         user = self.request.user
         if user.is_authenticated:
-            if user.user_type == 'government_agency':
+            if user_has_type(user, 'government_agency'):
                 queryset = queryset.filter(user=user)
         return queryset
 
 
 class RegisterViewSet(viewsets.ModelViewSet):
+    # Must stay public: this is how new accounts are created. Explicit now
+    # that the project-wide default is IsAuthenticated — without this, no
+    # one could register at all.
     queryset = CustomUser.objects.all()
     serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
     http_method_names = ['post']
 
     def create(self, request, *args, **kwargs):
@@ -353,8 +396,10 @@ class RegisterViewSet(viewsets.ModelViewSet):
 
 
 class LoginViewSet(viewsets.ModelViewSet):
+    # Must stay public: this is how users authenticate in the first place.
     queryset = CustomUser.objects.all()
     serializer_class = LoginSerializer
+    permission_classes = [AllowAny]
     http_method_names = ['post']
 
     def create(self, request, *args, **kwargs):
@@ -391,6 +436,9 @@ class LoginViewSet(viewsets.ModelViewSet):
 
 
 class SocialLoginView(APIView):
+    # Must stay public: this is a login entry point.
+    permission_classes = [AllowAny]
+
     def post(self, request):
         provider = request.data.get('provider')
         if provider == 'google':
@@ -417,12 +465,33 @@ class SocialLoginView(APIView):
 
 
 class UserTypeViewSet(viewsets.ModelViewSet):
+    # The list of role types (student/teacher/etc.) is needed on the public
+    # registration form, so reads stay open; writes require authentication.
+    # Mirrors the pattern already used correctly elsewhere in this codebase
+    # (SubjectViewSet, InstitutionTypeViewSet, ExaminationTypeViewSet).
     queryset = UserType.objects.filter(is_active=True)
     serializer_class = UserTypeSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         return UserType.objects.filter(is_active=True, is_deleted=False)
+
+
+class LogoutView(APIView):
+    """
+    Deletes the requesting user's auth token, invalidating it for future
+    requests. The frontend's AuthApiService.logout() already POSTs to
+    /logout/; previously no such route existed, so it silently 404'd and
+    the token stayed valid forever after "logging out".
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            request.user.auth_token.delete()
+        except (AttributeError, Token.DoesNotExist):
+            pass
+        return Response({'detail': 'Logged out.'}, status=status.HTTP_200_OK)
 
 
 class ProfileView(APIView):

@@ -4,22 +4,39 @@ from classroom_app.definitions.subjects.serializers import SubjectSerializer
 
 from .models import Exam, Question, Choice, ExamAttempt, Answer
 
+class PublicChoiceSerializer(serializers.ModelSerializer):
+    """
+    Answer-choice representation for anything a student can see while an exam
+    is in progress. Deliberately omits `is_correct` — QuestionSerializer used
+    to nest a ChoiceSerializer that included it, so any client fetching an
+    exam (or its questions) got the correct answer to every multiple-choice
+    question in the same response used to render the exam.
+    """
+    class Meta:
+        model = Choice
+        fields = ('id', 'choice_text')
+
 class ChoiceSerializer(serializers.ModelSerializer):
+    """
+    Full choice representation, including `is_correct`. Used only where the
+    caller is writing/managing exam content (QuestionCreateSerializer), never
+    for serializing a choice back to a student taking an exam.
+    """
     class Meta:
         model = Choice
         fields = ('id', 'choice_text', 'is_correct')
 
 class QuestionSerializer(serializers.ModelSerializer):
-    choices = ChoiceSerializer(many=True, read_only=True)
-    
+    choices = PublicChoiceSerializer(many=True, read_only=True)
+
     class Meta:
         model = Question
         fields = (
-            'custom_id', 
-            'question_text', 
-            'question_type', 
-            'marks', 
-            'order', 
+            'custom_id',
+            'question_text',
+            'question_type',
+            'marks',
+            'order',
             'choices'
         )
 

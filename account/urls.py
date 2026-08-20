@@ -24,6 +24,7 @@ from .views import (
     UserTypeViewSet,
     ProfileView,
     AnalyticsOverviewView,
+    LogoutView,
 )
 
 router = DefaultRouter()
@@ -51,6 +52,7 @@ router.register(r'user-types', UserTypeViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('social-login/', SocialLoginView.as_view()),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('analytics/overview/', AnalyticsOverviewView.as_view(), name='analytics-overview'),
 ]
