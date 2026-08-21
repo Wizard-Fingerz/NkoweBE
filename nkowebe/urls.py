@@ -32,6 +32,7 @@ api_urlpatterns = [
     path('', include('library_app.urls')),
     path('', include('notebook_app.urls')),
     path('', include('drives_app.urls')),
+    path('', include('nkowe_core.urls')),
 
 ]
 
